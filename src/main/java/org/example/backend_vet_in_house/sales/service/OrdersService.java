@@ -1,14 +1,17 @@
 package org.example.backend_vet_in_house.sales.service;
 
+import jakarta.persistence.criteria.Order;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.backend_vet_in_house.catalog.model.Product;
 import org.example.backend_vet_in_house.catalog.repository.ProductRepository;
 import org.example.backend_vet_in_house.sales.dto.req.CreateOrderReqDTO;
+import org.example.backend_vet_in_house.sales.dto.req.OrderDetailReqDTO;
 import org.example.backend_vet_in_house.sales.dto.res.OrderDetailResDTO;
 import org.example.backend_vet_in_house.sales.dto.res.OrderResDTO;
 import org.example.backend_vet_in_house.sales.model.OrderStatus;
 import org.example.backend_vet_in_house.sales.model.Orders;
+import org.example.backend_vet_in_house.sales.model.OrdersDetail;
 import org.example.backend_vet_in_house.sales.repository.OrdersRepository;
 import org.example.backend_vet_in_house.shared.exception.catalog.ProductNotFoundException;
 import org.example.backend_vet_in_house.shared.exception.sales.OrderAlreadyExistsException;
@@ -17,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -34,17 +38,17 @@ public class OrdersService {
     public String createOrder(CreateOrderReqDTO req) {
 
         boolean user = userEntityRepository.findById(req.userIdRef()).isPresent();
-        boolean order = ordersRepository.findOrderByCode(req.code()).isPresent();
+        boolean checkOrder = ordersRepository.findOrderByCode(req.code()).isPresent();
 
         if(!user) {
             throw new UsernameNotFoundException("User not found");
         }
 
-        if(order) {
+        if(checkOrder) {
             throw new OrderAlreadyExistsException("Order already exists");
         }
 
-        ordersRepository.save(Orders.builder()
+        Orders order = ordersRepository.save(Orders.builder()
                 .code(req.code())
                 .userIdRef(req.userIdRef())
                 .subtotal(req.subtotal())
@@ -59,7 +63,16 @@ public class OrdersService {
                 .build()
         );
 
-        req.orderDetails().forEach(od -> orderDetailService.createOrderDetail(od, req.code()));
+        List<OrderDetailReqDTO> listOrdersDetails = new ArrayList<>();
+
+        req.orderDetails().forEach(od ->
+            listOrdersDetails.add(new OrderDetailReqDTO(
+                    od.codeProduct(),
+                    od.quantity()
+            ))
+        );
+
+        orderDetailService.createOrderDetail(listOrdersDetails, order);
 
         return "Order created with successfully";
     }
