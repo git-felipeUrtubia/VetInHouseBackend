@@ -1,8 +1,11 @@
 package org.example.backend_vet_in_house.shared.exception;
 
+import org.example.backend_vet_in_house.shared.exception.appointment.AppointmentAlreadyExistException;
 import org.example.backend_vet_in_house.shared.exception.catalog.InsufficientStockException;
 import org.example.backend_vet_in_house.shared.exception.catalog.ProductAlreadyExistsException;
 import org.example.backend_vet_in_house.shared.exception.catalog.ProductNotFoundException;
+import org.example.backend_vet_in_house.shared.exception.pet.PetAlreadyExistException;
+import org.example.backend_vet_in_house.shared.exception.pet.PetNotFoundException;
 import org.example.backend_vet_in_house.shared.exception.sales.OrderAlreadyExistsException;
 import org.example.backend_vet_in_house.shared.exception.sales.OrderByUserIdNotFoundException;
 import org.example.backend_vet_in_house.shared.exception.sales.OrderNotFoundException;
@@ -80,6 +83,36 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(OrderAlreadyExistsException.class)
     public ResponseEntity<Map<String, String>> handleOrderAlreadyExists(OrderAlreadyExistsException ex) {
+
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "Conflicto");
+        response.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(PetNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handlePetNotFound(PetNotFoundException ex) {
+
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "Conflicto");
+        response.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(PetAlreadyExistException.class)
+    public ResponseEntity<Map<String, String>> handlePetAlreadyExist(PetAlreadyExistException ex) {
+
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "Conflicto");
+        response.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(AppointmentAlreadyExistException.class)
+    public ResponseEntity<Map<String, String>> handleAppointmentAlreadyExist(AppointmentAlreadyExistException ex) {
 
         Map<String, String> response = new HashMap<>();
         response.put("error", "Conflicto");

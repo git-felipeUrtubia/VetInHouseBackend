@@ -38,15 +38,14 @@ public class SecurityConfig {
                     http.requestMatchers(HttpMethod.POST, "/login");
 
                     http.requestMatchers("/api/v1/product/**").permitAll();
-                    http.requestMatchers(HttpMethod.POST, "/create").permitAll();
-                    http.requestMatchers(HttpMethod.GET, "/find-all").permitAll();
 
                     http.requestMatchers("/api/v1/orders/**").permitAll();
-                    http.requestMatchers(HttpMethod.POST, "/create").permitAll();
-                    http.requestMatchers(HttpMethod.GET, "/find-all").permitAll();
 
                     http.requestMatchers("/api/v1/user/**").permitAll();
-                    http.requestMatchers(HttpMethod.POST, "/find/order-history").permitAll();
+
+                    http.requestMatchers("/api/v1/pet/**").permitAll();
+
+                    http.requestMatchers("/api/v1/appointment/**").permitAll();
 
                     http.requestMatchers("/error").permitAll();
                     http.anyRequest().denyAll();

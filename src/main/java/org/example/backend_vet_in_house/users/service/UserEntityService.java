@@ -2,21 +2,23 @@ package org.example.backend_vet_in_house.users.service;
 
 
 import lombok.RequiredArgsConstructor;
+import org.example.backend_vet_in_house.appointments.repository.AppointmentRepository;
 import org.example.backend_vet_in_house.catalog.model.Product;
 import org.example.backend_vet_in_house.catalog.repository.ProductRepository;
+import org.example.backend_vet_in_house.pets.model.Pet;
+import org.example.backend_vet_in_house.pets.repository.PetRepository;
 import org.example.backend_vet_in_house.sales.model.Orders;
 import org.example.backend_vet_in_house.sales.repository.OrdersRepository;
 import org.example.backend_vet_in_house.shared.exception.catalog.ProductNotFoundException;
 import org.example.backend_vet_in_house.shared.exception.sales.OrderByUserIdNotFoundException;
-import org.example.backend_vet_in_house.users.dto.res.ContentOrderResDTO;
-import org.example.backend_vet_in_house.users.dto.res.ItemsOrderResDTO;
-import org.example.backend_vet_in_house.users.dto.res.OrderHistoryResDTO;
+import org.example.backend_vet_in_house.users.dto.res.*;
 import org.example.backend_vet_in_house.users.model.UserEntity;
 import org.example.backend_vet_in_house.users.repository.UserEntityRepository;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -26,10 +28,13 @@ public class UserEntityService {
     private final OrdersRepository ordersRepository;
     private final ProductRepository productRepository;
 
-    public OrderHistoryResDTO getOrderHistoryByUser(Long id) {
+    private final AppointmentRepository appointmentRepository;
+    private final PetRepository petRepository;
 
-        UserEntity user = userEntityRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public OrderHistoryResDTO getOrderHistoryByUser(String username) {
+
+        UserEntity user = userEntityRepository.findUserByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User " + username + " not found"));
 
         List<Orders> orders = ordersRepository.findOrderByUser(user.getUserId());
 
@@ -58,6 +63,42 @@ public class UserEntityService {
                 contentsOrder
         );
 
+    }
+
+    public AppointmentFromUserResDTO getAppointmentByUser(String username) {
+
+        UserEntity user = userEntityRepository.findUserByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User " + username + " not found"));
+
+        List<Pet> pets = petRepository.findPetsByUserId(user.getUserId());
+
+        List<ItemPetFromUserResDTO> itemsPet = pets.stream()
+                .map(pet -> {
+
+                    List<ItemAppointmentFromUserResDTO> itemsAp = appointmentRepository
+                            .findAllByPet(pet.getPetId()).stream()
+                            .map(it -> new ItemAppointmentFromUserResDTO(
+                                    it.getCodeService(),
+                                    it.getServiceType().name(),
+                                    it.getAppointmentDate(),
+                                    it.getCreateAt(),
+                                    it.getStatus().name()
+                            )).toList();
+
+                    return new ItemPetFromUserResDTO(
+                            pet.getPatientNumber(),
+                            pet.getName(),
+                            itemsAp
+                    );
+
+                }).toList();
+
+        return new AppointmentFromUserResDTO(
+                user.getFirstName(),
+                user.getLastName(),
+                user.getUsername(),
+                itemsPet
+        );
     }
 
 }

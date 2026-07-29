@@ -17,8 +17,13 @@ public class UserEntityController {
     private final UserEntityService userEntityService;
 
     @GetMapping("/find/order-history")
-    public ResponseEntity<?> getOrderHistory(@RequestParam Long id) {
-        return new ResponseEntity<>(userEntityService.getOrderHistoryByUser(id), HttpStatus.OK);
+    public ResponseEntity<?> getOrderHistory(@RequestParam String username) {
+        return new ResponseEntity<>(userEntityService.getOrderHistoryByUser(username), HttpStatus.OK);
+    }
+
+    @GetMapping("/find/pet-appointment")
+    public ResponseEntity<?> getAppointmentByUser(@RequestParam String username) {
+        return new ResponseEntity<>(userEntityService.getAppointmentByUser(username), HttpStatus.OK);
     }
 
 }
