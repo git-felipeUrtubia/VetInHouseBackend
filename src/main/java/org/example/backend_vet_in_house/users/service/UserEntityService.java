@@ -65,7 +65,7 @@ public class UserEntityService {
 
     }
 
-    public AppointmentFromUserResDTO getAppointmentByUser(String username) {
+    public AppointmentFromUserResDTO getAppointmentByUsername(String username) {
 
         UserEntity user = userEntityRepository.findUserByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User " + username + " not found"));
@@ -101,4 +101,34 @@ public class UserEntityService {
         );
     }
 
+    public PetFromUserResDTO getPetByUsername(String username) {
+
+        UserEntity user = userEntityRepository.findUserByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Username " + username + " not found"));
+
+        List<Pet> pets = petRepository.findPetsByUserId(user.getUserId());
+
+        List<ItemPetUser> items = pets.stream()
+                .map(p -> new ItemPetUser(
+                    p.getPatientNumber(),
+                    p.getName(),
+                    p.getAge(),
+                    p.getWeight(),
+                    p.getSpecie().name(),
+                    p.getGender().name(),
+                    p.getBreed(),
+                    p.isNeutered(),
+                    p.getAllergies(),
+                    p.getMicrochipNumber()
+                )
+        ).toList();
+
+        return new PetFromUserResDTO(
+                user.getFirstName(),
+                user.getLastName(),
+                user.getUsername(),
+                items
+        );
+
+    }
 }

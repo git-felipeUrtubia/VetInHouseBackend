@@ -10,6 +10,7 @@ import org.example.backend_vet_in_house.shared.exception.sales.OrderAlreadyExist
 import org.example.backend_vet_in_house.shared.exception.sales.OrderByUserIdNotFoundException;
 import org.example.backend_vet_in_house.shared.exception.sales.OrderNotFoundException;
 import org.example.backend_vet_in_house.shared.exception.user.UserAlreadyExistsException;
+import org.example.backend_vet_in_house.shared.exception.user.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -119,6 +120,16 @@ public class GlobalExceptionHandler {
         response.put("message", ex.getMessage());
 
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleUserNotFoundException(UserNotFoundException ex) {
+
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "not found");
+        response.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
 }

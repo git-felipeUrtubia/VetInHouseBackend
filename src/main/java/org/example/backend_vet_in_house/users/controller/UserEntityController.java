@@ -22,8 +22,13 @@ public class UserEntityController {
     }
 
     @GetMapping("/find/pet-appointment")
-    public ResponseEntity<?> getAppointmentByUser(@RequestParam String username) {
-        return new ResponseEntity<>(userEntityService.getAppointmentByUser(username), HttpStatus.OK);
+    public ResponseEntity<?> getAppointmentByUsername(@RequestParam String username) {
+        return new ResponseEntity<>(userEntityService.getAppointmentByUsername(username), HttpStatus.OK);
+    }
+
+    @GetMapping("/find/pet-user")
+    public ResponseEntity<?> getPetByUsername(@RequestParam String username) {
+        return new ResponseEntity<>(userEntityService.getPetByUsername(username), HttpStatus.OK);
     }
 
 }

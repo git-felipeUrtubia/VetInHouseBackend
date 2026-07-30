@@ -12,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,6 +21,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 @Configuration
 @RequiredArgsConstructor
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
@@ -43,7 +45,7 @@ public class SecurityConfig {
 
                     http.requestMatchers("/api/v1/user/**").permitAll();
 
-                    http.requestMatchers("/api/v1/pet/**").permitAll();
+                    http.requestMatchers("/api/v1/pet/**").authenticated();
 
                     http.requestMatchers("/api/v1/appointment/**").permitAll();
 

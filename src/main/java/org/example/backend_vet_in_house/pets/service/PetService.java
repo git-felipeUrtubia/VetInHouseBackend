@@ -8,6 +8,9 @@ import org.example.backend_vet_in_house.pets.model.Pet;
 import org.example.backend_vet_in_house.pets.model.Specie;
 import org.example.backend_vet_in_house.pets.repository.PetRepository;
 import org.example.backend_vet_in_house.shared.exception.pet.PetAlreadyExistException;
+import org.example.backend_vet_in_house.shared.exception.user.UserNotFoundException;
+import org.example.backend_vet_in_house.users.repository.UserEntityRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,8 +20,15 @@ import java.util.List;
 public class PetService {
 
     private final PetRepository petRepository;
+    private final UserEntityRepository userEntityRepository;
 
-    public String savePet(SavePetReqDTO req) {
+    public String savePet(SavePetReqDTO req, String username) {
+
+
+        boolean checkUser = userEntityRepository.findUserByUsername(username).isPresent();
+        if(!checkUser) {
+            throw new UserNotFoundException("User not found");
+        }
 
         boolean checkPet = petRepository.findPetByPatientNumber(req.patientNumber()).isPresent();
 
