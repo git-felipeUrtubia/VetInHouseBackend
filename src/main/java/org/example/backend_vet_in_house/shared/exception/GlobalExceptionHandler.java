@@ -13,6 +13,9 @@ import org.example.backend_vet_in_house.shared.exception.user.UserAlreadyExistsE
 import org.example.backend_vet_in_house.shared.exception.user.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -21,6 +24,30 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleValidationException(MethodArgumentNotValidException ex) {
+
+        Map<String, String> response = new HashMap<>();
+
+        String errorMessage = ex.getBindingResult().getFieldErrors().getFirst().getDefaultMessage();
+
+        response.put("error", "Bad request");
+        response.put("message", errorMessage);
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({BadCredentialsException.class, UsernameNotFoundException.class})
+    public ResponseEntity<Map<String, String>> handleAuthenticationExceptions(RuntimeException ex) {
+        Map<String, String> response = new HashMap<>();
+
+        response.put("error", "Unauthorized");
+        // Puedes poner un mensaje genérico por seguridad (para no revelar si falló el correo o la clave)
+        response.put("message", "Correo o contraseña incorrectos");
+
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
 
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<Map<String, String>> handleUserAlreadyExists(UserAlreadyExistsException ex) {

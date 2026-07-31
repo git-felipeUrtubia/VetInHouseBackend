@@ -1,5 +1,6 @@
 package org.example.backend_vet_in_house.users.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.backend_vet_in_house.users.dto.req.LoginReqDTO;
 import org.example.backend_vet_in_house.users.dto.req.RegisterReqDTO;
@@ -22,13 +23,13 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegisterReqDTO req) throws RoleNotFoundException {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterReqDTO req) throws RoleNotFoundException {
 
         return new ResponseEntity<>(authService.registerUser(req), HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody LoginReqDTO req) {
+    public ResponseEntity<?> loginUser(@Valid @RequestBody LoginReqDTO req) {
 
         return new ResponseEntity<>(authService.loginUser(req), HttpStatus.OK);
     }
