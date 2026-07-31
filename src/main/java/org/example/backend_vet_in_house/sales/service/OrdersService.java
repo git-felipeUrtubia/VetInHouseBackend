@@ -1,6 +1,5 @@
 package org.example.backend_vet_in_house.sales.service;
 
-import jakarta.persistence.criteria.Order;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.backend_vet_in_house.catalog.model.Product;
@@ -11,19 +10,17 @@ import org.example.backend_vet_in_house.sales.dto.res.OrderDetailResDTO;
 import org.example.backend_vet_in_house.sales.dto.res.OrderResDTO;
 import org.example.backend_vet_in_house.sales.model.OrderStatus;
 import org.example.backend_vet_in_house.sales.model.Orders;
-import org.example.backend_vet_in_house.sales.model.OrdersDetail;
 import org.example.backend_vet_in_house.sales.repository.OrdersRepository;
 import org.example.backend_vet_in_house.shared.exception.catalog.ProductNotFoundException;
 import org.example.backend_vet_in_house.shared.exception.sales.OrderAlreadyExistsException;
+import org.example.backend_vet_in_house.shared.exception.user.UserNotFoundException;
+import org.example.backend_vet_in_house.users.model.UserEntity;
 import org.example.backend_vet_in_house.users.repository.UserEntityRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 @RequiredArgsConstructor
@@ -37,12 +34,10 @@ public class OrdersService {
     @Transactional
     public String createOrder(CreateOrderReqDTO req) {
 
-        boolean user = userEntityRepository.findById(req.userIdRef()).isPresent();
+        UserEntity user = userEntityRepository.findUserByUsername(req.username())
+                .orElseThrow(() -> new UserNotFoundException("User " + req.username() + " not found"));
         boolean checkOrder = ordersRepository.findOrderByCode(req.code()).isPresent();
 
-        if(!user) {
-            throw new UsernameNotFoundException("User not found");
-        }
 
         if(checkOrder) {
             throw new OrderAlreadyExistsException("Order already exists");
@@ -50,7 +45,7 @@ public class OrdersService {
 
         Orders order = ordersRepository.save(Orders.builder()
                 .code(req.code())
-                .userIdRef(req.userIdRef())
+                .userIdRef(user.getUserId())
                 .subtotal(req.subtotal())
                 .tax(req.tax())
                 .shippingCost(req.shippingCost())
@@ -88,8 +83,7 @@ public class OrdersService {
 
                     return new OrderDetailResDTO(
                             prod.getName(),
-                            od.getQuantity(),
-                            od.getOrder().getCode()
+                            od.getQuantity()
                     );
                 }).toList();
 

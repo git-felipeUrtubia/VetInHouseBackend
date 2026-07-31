@@ -7,7 +7,7 @@ import java.util.List;
 
 public record CreateOrderReqDTO(
         String code,
-        Long userIdRef,
+        String username,
         BigDecimal subtotal,
         BigDecimal tax,
         BigDecimal shippingCost,

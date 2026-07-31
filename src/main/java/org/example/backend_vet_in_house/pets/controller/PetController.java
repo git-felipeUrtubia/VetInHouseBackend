@@ -16,7 +16,6 @@ public class PetController {
 
     private final PetService petService;
 
-    @PreAuthorize("hasAnyRole('USER')")
     @PostMapping("/create")
     public ResponseEntity<?> savedPet(@RequestBody SavePetReqDTO req, Authentication authentication) {
         String username = authentication.getName();

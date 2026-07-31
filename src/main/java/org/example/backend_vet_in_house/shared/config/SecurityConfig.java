@@ -35,17 +35,20 @@ public class SecurityConfig {
                 .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(http -> {
 
-                    http.requestMatchers("/api/v1/auth/**").permitAll();
-                    http.requestMatchers(HttpMethod.POST, "/register");
-                    http.requestMatchers(HttpMethod.POST, "/login");
+                    http.requestMatchers(HttpMethod.POST, "/api/v1/auth/register").permitAll();
+                    http.requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll();
 
                     http.requestMatchers("/api/v1/product/**").permitAll();
 
                     http.requestMatchers("/api/v1/orders/**").permitAll();
 
-                    http.requestMatchers("/api/v1/user/**").permitAll();
+                    http.requestMatchers("/api/v1/user/find/order-history").authenticated();
+                    http.requestMatchers("/api/v1/user/find/pet-appointment").authenticated();
+                    http.requestMatchers("/api/v1/user/find/pet-user").authenticated();
 
-                    http.requestMatchers("/api/v1/pet/**").authenticated();
+
+                    http.requestMatchers("/api/v1/pet/create").authenticated();
+                    http.requestMatchers("/api/v1/pet/find-all").hasRole("ADMIN");
 
                     http.requestMatchers("/api/v1/appointment/**").permitAll();
 

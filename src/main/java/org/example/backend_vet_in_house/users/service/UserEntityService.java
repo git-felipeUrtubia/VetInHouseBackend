@@ -11,6 +11,7 @@ import org.example.backend_vet_in_house.sales.model.Orders;
 import org.example.backend_vet_in_house.sales.repository.OrdersRepository;
 import org.example.backend_vet_in_house.shared.exception.catalog.ProductNotFoundException;
 import org.example.backend_vet_in_house.shared.exception.sales.OrderByUserIdNotFoundException;
+import org.example.backend_vet_in_house.shared.exception.user.UserNotFoundException;
 import org.example.backend_vet_in_house.users.dto.res.*;
 import org.example.backend_vet_in_house.users.model.UserEntity;
 import org.example.backend_vet_in_house.users.repository.UserEntityRepository;
@@ -68,7 +69,7 @@ public class UserEntityService {
     public AppointmentFromUserResDTO getAppointmentByUsername(String username) {
 
         UserEntity user = userEntityRepository.findUserByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User " + username + " not found"));
+                .orElseThrow(() -> new UserNotFoundException("User " + username + " not found"));
 
         List<Pet> pets = petRepository.findPetsByUserId(user.getUserId());
 
