@@ -77,7 +77,7 @@ public class AuthService {
                 .orElseThrow(() -> new UsernameNotFoundException("Username" + username + " not found"));
 
         return new LoginResDTO(
-                user.getLastName(),
+                user.getFirstName(),
                 user.getLastName(),
                 username,
                 "User logued successfuly.",
