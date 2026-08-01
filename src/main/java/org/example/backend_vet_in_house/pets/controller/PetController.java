@@ -17,9 +17,8 @@ public class PetController {
     private final PetService petService;
 
     @PostMapping("/create")
-    public ResponseEntity<?> savedPet(@RequestBody SavePetReqDTO req, Authentication authentication) {
-        String username = authentication.getName();
-        return new ResponseEntity<>(petService.savePet(req, username), HttpStatus.CREATED);
+    public ResponseEntity<?> savedPet(@RequestBody SavePetReqDTO req) {
+        return new ResponseEntity<>(petService.savePet(req), HttpStatus.CREATED);
     }
 
     @GetMapping("/find-all")

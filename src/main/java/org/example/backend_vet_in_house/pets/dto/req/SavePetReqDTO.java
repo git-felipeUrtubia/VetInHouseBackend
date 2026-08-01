@@ -1,7 +1,7 @@
 package org.example.backend_vet_in_house.pets.dto.req;
 
 public record SavePetReqDTO(
-        Long userIdRef,
+        String username,
         String patientNumber,
         String name,
         int age,
