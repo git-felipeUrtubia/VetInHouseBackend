@@ -3,6 +3,7 @@ package org.example.backend_vet_in_house.users.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.backend_vet_in_house.shared.exception.user.UserAlreadyExistsException;
+import org.example.backend_vet_in_house.users.dto.res.RoleResDTO;
 import org.example.backend_vet_in_house.utils.JwtUtil;
 import org.example.backend_vet_in_house.users.dto.req.LoginReqDTO;
 import org.example.backend_vet_in_house.users.dto.req.RegisterReqDTO;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import javax.management.relation.RoleNotFoundException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -76,12 +78,18 @@ public class AuthService {
         UserEntity user = userEntityRepository.findUserByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Username" + username + " not found"));
 
+        List<RoleResDTO> roles = user.getRoles().stream()
+                .map(r -> new RoleResDTO(
+                        r.getRoleEnum().name()
+                )).toList();
+
         return new LoginResDTO(
                 user.getFirstName(),
                 user.getLastName(),
                 username,
                 "User logued successfuly.",
                 token,
+                roles,
                 true);
     }
 
