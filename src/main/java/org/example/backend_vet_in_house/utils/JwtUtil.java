@@ -1,4 +1,4 @@
-package org.example.backend_vet_in_house.users.utils;
+package org.example.backend_vet_in_house.utils;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;

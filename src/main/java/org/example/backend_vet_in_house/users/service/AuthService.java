@@ -3,7 +3,7 @@ package org.example.backend_vet_in_house.users.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.backend_vet_in_house.shared.exception.user.UserAlreadyExistsException;
-import org.example.backend_vet_in_house.users.utils.JwtUtil;
+import org.example.backend_vet_in_house.utils.JwtUtil;
 import org.example.backend_vet_in_house.users.dto.req.LoginReqDTO;
 import org.example.backend_vet_in_house.users.dto.req.RegisterReqDTO;
 import org.example.backend_vet_in_house.users.dto.res.LoginResDTO;

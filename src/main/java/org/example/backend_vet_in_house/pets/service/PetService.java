@@ -2,16 +2,17 @@ package org.example.backend_vet_in_house.pets.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.backend_vet_in_house.pets.dto.req.SavePetReqDTO;
+import org.example.backend_vet_in_house.pets.dto.req.UpdatePetReqDTO;
 import org.example.backend_vet_in_house.pets.dto.res.PetResDTO;
 import org.example.backend_vet_in_house.pets.model.Gender;
 import org.example.backend_vet_in_house.pets.model.Pet;
 import org.example.backend_vet_in_house.pets.model.Specie;
 import org.example.backend_vet_in_house.pets.repository.PetRepository;
 import org.example.backend_vet_in_house.shared.exception.pet.PetAlreadyExistException;
+import org.example.backend_vet_in_house.shared.exception.pet.PetNotFoundException;
 import org.example.backend_vet_in_house.shared.exception.user.UserNotFoundException;
 import org.example.backend_vet_in_house.users.model.UserEntity;
 import org.example.backend_vet_in_house.users.repository.UserEntityRepository;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -72,4 +73,33 @@ public class PetService {
                 )).toList();
     }
 
+    public String updatePetByPacientNumber(UpdatePetReqDTO req, String patientNumber) {
+
+        Pet pet = petRepository.findPetByPatientNumber(patientNumber)
+                .orElseThrow(() -> new PetNotFoundException("Pet " + patientNumber + " not found"));
+
+        pet.setName(req.name());
+        pet.setAge(req.age());
+        pet.setWeight(req.weight());
+        pet.setSpecie(Specie.valueOf(req.specie()));
+        pet.setGender(Gender.valueOf(req.gender()));
+        pet.setBreed(req.breed());
+        pet.setNeutered(req.isNeutered());
+        pet.setAllergies(req.allergies());
+        pet.setMicrochipNumber(req.microchipNumber());
+
+        petRepository.save(pet);
+
+        return "Pet update with successfully!";
+    }
+
+    public String deletePetByPacientNumber(String patientNumber) {
+
+        Pet pet = petRepository.findPetByPatientNumber(patientNumber)
+                .orElseThrow(() -> new PetNotFoundException("Pet " + patientNumber + " not found"));
+
+        petRepository.deleteById(pet.getPetId());
+
+        return "Pet delete with successfully";
+    }
 }

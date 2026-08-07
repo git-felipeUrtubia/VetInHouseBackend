@@ -2,6 +2,7 @@ package org.example.backend_vet_in_house.pets.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.backend_vet_in_house.pets.dto.req.SavePetReqDTO;
+import org.example.backend_vet_in_house.pets.dto.req.UpdatePetReqDTO;
 import org.example.backend_vet_in_house.pets.service.PetService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,4 +27,16 @@ public class PetController {
         return new ResponseEntity<>(petService.findAllPets(), HttpStatus.OK);
     }
 
+    @PutMapping("/update")
+    public ResponseEntity<?> updatePetByPacientNumber(
+            @RequestBody UpdatePetReqDTO req,
+            @RequestParam String pacientNumber)
+    {
+        return new ResponseEntity<>(petService.updatePetByPacientNumber(req, pacientNumber), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deletePetByPatientNumber(@RequestParam String patientNumber) {
+        return new ResponseEntity<>(petService.deletePetByPacientNumber(patientNumber), HttpStatus.OK);
+    }
 }

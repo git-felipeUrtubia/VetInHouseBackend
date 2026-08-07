@@ -2,7 +2,7 @@ package org.example.backend_vet_in_house.shared.config;
 
 import lombok.RequiredArgsConstructor;
 import org.example.backend_vet_in_house.shared.config.filter.JwtFilterValidator;
-import org.example.backend_vet_in_house.users.utils.JwtUtil;
+import org.example.backend_vet_in_house.utils.JwtUtil;
 import org.example.backend_vet_in_house.users.service.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,8 +47,11 @@ public class SecurityConfig {
                     http.requestMatchers("/api/v1/user/find/pet-user").authenticated();
 
 
+
                     http.requestMatchers("/api/v1/pet/create").authenticated();
                     http.requestMatchers("/api/v1/pet/find-all").hasRole("ADMIN");
+                    http.requestMatchers("/api/v1/pet/update").authenticated();
+                    http.requestMatchers("/api/v1/pet/delete").authenticated();
 
                     http.requestMatchers("/api/v1/appointment/**").permitAll();
 
