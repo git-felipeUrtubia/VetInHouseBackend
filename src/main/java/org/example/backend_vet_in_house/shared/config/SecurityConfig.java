@@ -38,7 +38,9 @@ public class SecurityConfig {
                     http.requestMatchers(HttpMethod.POST, "/api/v1/auth/register").permitAll();
                     http.requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll();
 
-                    http.requestMatchers("/api/v1/product/**").permitAll();
+                    http.requestMatchers("/api/v1/product/create").hasRole("ADMIN");
+                    http.requestMatchers("/api/v1/product/find-all-admin").hasRole("ADMIN");
+                    http.requestMatchers("/api/v1/product/find-all").permitAll();
 
                     http.requestMatchers("/api/v1/orders/**").permitAll();
 

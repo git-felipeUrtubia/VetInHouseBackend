@@ -24,6 +24,11 @@ public class ProductController {
         return new ResponseEntity<>(productService.findAllProducts(), HttpStatus.OK);
     }
 
+    @GetMapping("/find-all-admin")
+    public ResponseEntity<?> findAllProductsAdmin() {
+        return new ResponseEntity<>(productService.findAllProductsAdmin(), HttpStatus.OK);
+    }
+
     @GetMapping("/find")
     public ResponseEntity<?> findByProductCode(@RequestParam String code) {
         return new ResponseEntity<>(productService.findProductByCode(code), HttpStatus.OK);

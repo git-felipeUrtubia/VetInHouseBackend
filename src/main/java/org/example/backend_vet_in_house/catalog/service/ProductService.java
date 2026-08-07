@@ -2,6 +2,7 @@ package org.example.backend_vet_in_house.catalog.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.backend_vet_in_house.catalog.dto.req.CreateProductDTO;
+import org.example.backend_vet_in_house.catalog.dto.res.ProductPanelAdminResDTO;
 import org.example.backend_vet_in_house.catalog.dto.res.ProductResDTO;
 import org.example.backend_vet_in_house.catalog.model.Categoria;
 import org.example.backend_vet_in_house.catalog.model.Product;
@@ -72,6 +73,20 @@ public class ProductService {
 
     public void deleteProductByCode(String code) {
         productRepository.deleteProductByCode(code);
+    }
+
+    public List<ProductPanelAdminResDTO> findAllProductsAdmin() {
+        return productRepository.findAll().stream()
+                .map(p -> new ProductPanelAdminResDTO(
+                        p.getCode(),
+                        p.getName(),
+                        p.getDescription(),
+                        p.getPrice(),
+                        p.getImage(),
+                        p.getCategoria().name(),
+                        p.getStock()
+                ))
+                .toList();
     }
 
 }
