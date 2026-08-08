@@ -35,6 +35,9 @@ public class SecurityConfig {
                 .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(http -> {
 
+                    http.requestMatchers(HttpMethod.POST, "/api/v1/payments/create").permitAll();
+                    http.requestMatchers(HttpMethod.POST, "/api/v1/payments/confirm").permitAll();
+
                     http.requestMatchers(HttpMethod.POST, "/api/v1/auth/register").permitAll();
                     http.requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll();
 
