@@ -36,6 +36,7 @@ public class ProductService {
                 .name(req.name())
                 .description(req.description())
                 .price(req.price())
+                .priceOffer(req.priceOffer())
                 .image(req.image())
                 .stock(req.stock())
                 .categoria(Categoria.valueOf(req.categoria()))
@@ -51,6 +52,7 @@ public class ProductService {
                         p.getName(),
                         p.getDescription(),
                         p.getPrice(),
+                        p.getPriceOffer(),
                         p.getImage(),
                         p.getCategoria().name()
                 ))
@@ -66,6 +68,7 @@ public class ProductService {
                 prod.getName(),
                 prod.getDescription(),
                 prod.getPrice(),
+                prod.getPriceOffer(),
                 prod.getImage(),
                 prod.getCategoria().name()
         );
@@ -82,6 +85,7 @@ public class ProductService {
                         p.getName(),
                         p.getDescription(),
                         p.getPrice(),
+                        p.getPriceOffer(),
                         p.getImage(),
                         p.getCategoria().name(),
                         p.getStock()

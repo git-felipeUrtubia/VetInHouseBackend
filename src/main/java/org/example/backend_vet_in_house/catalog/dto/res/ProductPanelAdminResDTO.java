@@ -10,6 +10,7 @@ import java.math.BigDecimal;
         "name",
         "description",
         "price",
+        "priceOffer",
         "image",
         "categoria",
         "stock"
@@ -19,6 +20,7 @@ public record ProductPanelAdminResDTO(
         String name,
         String description,
         BigDecimal price,
+        BigDecimal priceOffer,
         String image,
         String categoria,
         int stock

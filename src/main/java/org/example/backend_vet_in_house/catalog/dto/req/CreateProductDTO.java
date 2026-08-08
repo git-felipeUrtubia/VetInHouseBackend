@@ -9,6 +9,7 @@ public record CreateProductDTO(
         String code,
         String description,
         BigDecimal price,
+        BigDecimal priceOffer,
         String image,
         String categoria,
         int stock

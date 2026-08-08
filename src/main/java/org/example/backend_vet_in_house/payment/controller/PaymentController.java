@@ -5,6 +5,7 @@ import cl.transbank.webpay.webpayplus.responses.WebpayPlusTransactionCreateRespo
 import lombok.RequiredArgsConstructor;
 import org.example.backend_vet_in_house.payment.dto.req.PaymentReqDTO;
 import org.example.backend_vet_in_house.payment.service.PaymentService;
+import org.example.backend_vet_in_house.sales.service.OrdersService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class PaymentController {
 
     private final PaymentService paymentService;
+    private final OrdersService ordersService;
 
 
     @PostMapping("/create")

@@ -29,6 +29,9 @@ public class Product {
 
     private BigDecimal price;
 
+    @Column(name = "price_offer")
+    private BigDecimal priceOffer;
+
     private String image;
 
     @Enumerated(EnumType.STRING)
