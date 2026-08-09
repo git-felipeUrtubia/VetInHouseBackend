@@ -6,17 +6,14 @@ import org.example.backend_vet_in_house.catalog.model.Product;
 import org.example.backend_vet_in_house.catalog.repository.ProductRepository;
 import org.example.backend_vet_in_house.sales.dto.req.CreateOrderReqDTO;
 import org.example.backend_vet_in_house.sales.dto.req.OrderDetailReqDTO;
-import org.example.backend_vet_in_house.sales.dto.res.OrderDetailResDTO;
-import org.example.backend_vet_in_house.sales.dto.res.OrderResDTO;
-import org.example.backend_vet_in_house.sales.model.OrderStatus;
-import org.example.backend_vet_in_house.sales.model.Orders;
+import org.example.backend_vet_in_house.sales.dto.res.*;
+import org.example.backend_vet_in_house.sales.model.*;
 import org.example.backend_vet_in_house.sales.repository.OrdersRepository;
 import org.example.backend_vet_in_house.shared.exception.catalog.ProductNotFoundException;
 import org.example.backend_vet_in_house.shared.exception.sales.OrderAlreadyExistsException;
 import org.example.backend_vet_in_house.shared.exception.user.UserNotFoundException;
 import org.example.backend_vet_in_house.users.model.UserEntity;
 import org.example.backend_vet_in_house.users.repository.UserEntityRepository;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -30,6 +27,9 @@ public class OrdersService {
     private final OrderDetailService orderDetailService;
     private final OrdersRepository ordersRepository;
     private final UserEntityRepository userEntityRepository;
+    private final AddressService addressService;
+    private final CommuneService communeService;
+    private final RegionService regionService;
 
     @Transactional
     public String createOrder(CreateOrderReqDTO req) {
@@ -43,6 +43,11 @@ public class OrdersService {
             throw new OrderAlreadyExistsException("Order already exists");
         }
 
+        Region region = regionService.findRegionByCode(req.codeRegion());
+        Commune commune = communeService.findCommuneByCode(req.codeCommune());
+        Address address = addressService.saveAddress(req.address(), commune, region);
+
+
         Orders order = ordersRepository.save(Orders.builder()
                 .code(req.code())
                 .userIdRef(user.getUserId())
@@ -51,10 +56,10 @@ public class OrdersService {
                 .shippingCost(req.shippingCost())
                 .totalAmount(req.totalAmount())
                 .orderStatus(OrderStatus.valueOf(req.orderStatus()))
-                .shippingAddress(req.shippingAddress())
                 .createAt(req.createAt())
                 .updateAt(req.updateAt())
                 .paidAt(req.paidAt())
+                .address(address)
                 .build()
         );
 
@@ -87,6 +92,20 @@ public class OrdersService {
                     );
                 }).toList();
 
+                AddressResDTO address = new AddressResDTO(
+                        order.getAddress().getCode(),
+                        order.getAddress().getStreet(),
+                        order.getAddress().getNumber()
+                );
+                CommuneResDTO commune = new CommuneResDTO(
+                        order.getAddress().getCommune().getCode(),
+                        order.getAddress().getCommune().getCommune()
+                );
+                RegionResDTO region = new RegionResDTO(
+                        order.getAddress().getCommune().getRegion().getCode(),
+                        order.getAddress().getCommune().getRegion().getRegion()
+                );
+
                 return new OrderResDTO(
                         order.getCode(),
                         order.getSubtotal(),
@@ -94,11 +113,13 @@ public class OrdersService {
                         order.getShippingCost(),
                         order.getTotalAmount(),
                         order.getOrderStatus().name(),
-                        order.getShippingAddress(),
                         order.getCreateAt(),
                         order.getUpdateAt(),
                         order.getPaidAt(),
-                        odDTO
+                        odDTO,
+                        address,
+                        commune,
+                        region
                 );
             }
         ).toList();

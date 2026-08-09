@@ -44,9 +44,6 @@ public class Orders {
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
-    @Column(name = "shipping_address")
-    private String shippingAddress;
-
     @Column(name = "create_at")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createAt;
@@ -61,4 +58,8 @@ public class Orders {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "order")
     private List<OrdersDetail> ordersDetails = new ArrayList<>();
+
+    @OneToOne
+    @JoinColumn(name = "address_id")
+    private Address address;
 }

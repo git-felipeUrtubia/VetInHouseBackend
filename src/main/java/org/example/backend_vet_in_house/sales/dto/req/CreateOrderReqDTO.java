@@ -13,10 +13,12 @@ public record CreateOrderReqDTO(
         BigDecimal shippingCost,
         BigDecimal totalAmount,
         String orderStatus,
-        String shippingAddress,
         LocalDateTime createAt,
         LocalDateTime updateAt,
         LocalDateTime paidAt,
-        List<OrderDetailReqDTO> orderDetails
+        List<OrderDetailReqDTO> orderDetails,
+        AddressReqDTO address,
+        String codeCommune,
+        String codeRegion
 ) {
 }

@@ -6,9 +6,7 @@ import org.example.backend_vet_in_house.shared.exception.catalog.ProductAlreadyE
 import org.example.backend_vet_in_house.shared.exception.catalog.ProductNotFoundException;
 import org.example.backend_vet_in_house.shared.exception.pet.PetAlreadyExistException;
 import org.example.backend_vet_in_house.shared.exception.pet.PetNotFoundException;
-import org.example.backend_vet_in_house.shared.exception.sales.OrderAlreadyExistsException;
-import org.example.backend_vet_in_house.shared.exception.sales.OrderByUserIdNotFoundException;
-import org.example.backend_vet_in_house.shared.exception.sales.OrderNotFoundException;
+import org.example.backend_vet_in_house.shared.exception.sales.*;
 import org.example.backend_vet_in_house.shared.exception.user.UserAlreadyExistsException;
 import org.example.backend_vet_in_house.shared.exception.user.UserNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -151,6 +149,26 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleUserNotFoundException(UserNotFoundException ex) {
+
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "not found");
+        response.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(RegionNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleRegionNotFoundException(RegionNotFoundException ex) {
+
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "not found");
+        response.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(CommuneNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleCommuneNotFoundException(CommuneNotFoundException ex) {
 
         Map<String, String> response = new HashMap<>();
         response.put("error", "not found");

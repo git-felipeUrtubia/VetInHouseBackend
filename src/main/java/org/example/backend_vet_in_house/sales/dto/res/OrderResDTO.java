@@ -13,7 +13,6 @@ import java.util.List;
         "shippingCost",
         "totalAmount",
         "orderStatus",
-        "shippingAddress",
         "createAt",
         "updateAt",
         "paidAt",
@@ -26,10 +25,12 @@ public record OrderResDTO(
         BigDecimal shippingCost,
         BigDecimal totalAmount,
         String orderStatus,
-        String shippingAddress,
         LocalDateTime createAt,
         LocalDateTime updateAt,
         LocalDateTime paidAt,
-        List<OrderDetailResDTO> orderDetailDTO
+        List<OrderDetailResDTO> orderDetailDTO,
+        AddressResDTO address,
+        CommuneResDTO commune,
+        RegionResDTO region
 ) {
 }
