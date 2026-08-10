@@ -8,10 +8,6 @@ import java.util.List;
 public record CreateOrderReqDTO(
         String code,
         String username,
-        BigDecimal subtotal,
-        BigDecimal tax,
-        BigDecimal shippingCost,
-        BigDecimal totalAmount,
         String orderStatus,
         LocalDateTime createAt,
         LocalDateTime updateAt,

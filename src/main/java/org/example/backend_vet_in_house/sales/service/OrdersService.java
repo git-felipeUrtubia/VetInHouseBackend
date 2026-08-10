@@ -6,6 +6,7 @@ import org.example.backend_vet_in_house.catalog.model.Product;
 import org.example.backend_vet_in_house.catalog.repository.ProductRepository;
 import org.example.backend_vet_in_house.sales.dto.req.CreateOrderReqDTO;
 import org.example.backend_vet_in_house.sales.dto.req.OrderDetailReqDTO;
+import org.example.backend_vet_in_house.sales.dto.req.OrderTotals;
 import org.example.backend_vet_in_house.sales.dto.res.*;
 import org.example.backend_vet_in_house.sales.model.*;
 import org.example.backend_vet_in_house.sales.repository.OrdersRepository;
@@ -16,6 +17,8 @@ import org.example.backend_vet_in_house.users.model.UserEntity;
 import org.example.backend_vet_in_house.users.repository.UserEntityRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,13 +51,46 @@ public class OrdersService {
         Address address = addressService.saveAddress(req.address(), commune, region);
 
 
+        BigDecimal subtotal = req.orderDetails().stream()
+                .map(od -> {
+
+                    Product p = productRepository.findProductByCode(od.codeProduct())
+                            .orElseThrow(() -> new ProductNotFoundException(
+                                    "Product " + od.codeProduct() + " not found"
+                            ));
+
+                    BigDecimal quantity = BigDecimal.valueOf(od.quantity());
+                    BigDecimal total = p.getPrice().multiply(quantity);
+                    BigDecimal descTotal = p.getPriceOffer().multiply(quantity);
+
+                    return total.subtract(descTotal);
+
+                }).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal shippingCost = region.getShippingCost();
+        BigDecimal totalAmount = subtotal.add(shippingCost);
+
+        BigDecimal ivaFactor = new BigDecimal("1.19");
+        BigDecimal valueNeto = totalAmount.divide(ivaFactor, 0, RoundingMode.HALF_UP);
+        BigDecimal tax = totalAmount.subtract(valueNeto);
+
+        OrderTotals orderTotals = new OrderTotals(
+                valueNeto,
+                tax,
+                shippingCost,
+                totalAmount
+        );
+
+
+
+
         Orders order = ordersRepository.save(Orders.builder()
                 .code(req.code())
                 .userIdRef(user.getUserId())
-                .subtotal(req.subtotal())
-                .tax(req.tax())
-                .shippingCost(req.shippingCost())
-                .totalAmount(req.totalAmount())
+                .subtotal( orderTotals.subtotal() )
+                .tax( orderTotals.tax() )
+                .shippingCost( orderTotals.shippingCost() )
+                .totalAmount( orderTotals.totalAmount() )
                 .orderStatus(OrderStatus.valueOf(req.orderStatus()))
                 .createAt(req.createAt())
                 .updateAt(req.updateAt())
@@ -103,7 +139,8 @@ public class OrdersService {
                 );
                 RegionResDTO region = new RegionResDTO(
                         order.getAddress().getCommune().getRegion().getCode(),
-                        order.getAddress().getCommune().getRegion().getRegion()
+                        order.getAddress().getCommune().getRegion().getRegion(),
+                        order.getAddress().getCommune().getRegion().getShippingCost()
                 );
 
                 return new OrderResDTO(

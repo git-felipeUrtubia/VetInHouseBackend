@@ -20,6 +20,7 @@ public class RegionService {
         return regionRepository.save(Region.builder()
                         .code(req.code())
                         .region(req.region())
+                        .shippingCost(req.shippingCost())
                 .build());
 
     }
