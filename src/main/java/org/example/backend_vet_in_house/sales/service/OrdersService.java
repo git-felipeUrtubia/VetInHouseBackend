@@ -12,6 +12,7 @@ import org.example.backend_vet_in_house.sales.model.*;
 import org.example.backend_vet_in_house.sales.repository.OrdersRepository;
 import org.example.backend_vet_in_house.shared.exception.catalog.ProductNotFoundException;
 import org.example.backend_vet_in_house.shared.exception.sales.OrderAlreadyExistsException;
+import org.example.backend_vet_in_house.shared.exception.shipping.CommuneNotBelongToRegion;
 import org.example.backend_vet_in_house.shared.exception.user.UserNotFoundException;
 import org.example.backend_vet_in_house.users.model.UserEntity;
 import org.example.backend_vet_in_house.users.repository.UserEntityRepository;
@@ -48,6 +49,11 @@ public class OrdersService {
 
         Region region = regionService.findRegionByCode(req.codeRegion());
         Commune commune = communeService.findCommuneByCode(req.codeCommune());
+
+        if(!region.getRegionId().equals(commune.getRegion().getRegionId())) {
+            throw new CommuneNotBelongToRegion("the commune not belong to region");
+        }
+
         Address address = addressService.saveAddress(req.address(), commune, region);
 
 
@@ -67,6 +73,7 @@ public class OrdersService {
 
                 }).reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        System.out.println("SUBTOTAL: " + subtotal);
         BigDecimal shippingCost = region.getShippingCost();
         BigDecimal totalAmount = subtotal.add(shippingCost);
 
@@ -75,7 +82,7 @@ public class OrdersService {
         BigDecimal tax = totalAmount.subtract(valueNeto);
 
         OrderTotals orderTotals = new OrderTotals(
-                valueNeto,
+                subtotal,
                 tax,
                 shippingCost,
                 totalAmount
@@ -119,11 +126,11 @@ public class OrdersService {
             .map(order -> {
 
                 List<OrderDetailResDTO> odDTO = order.getOrdersDetails().stream().map(od -> {
-                    Product prod = productRepository.findById(od.getProductIdRef())
-                            .orElseThrow(() -> new ProductNotFoundException("Product not found"));
 
                     return new OrderDetailResDTO(
-                            prod.getName(),
+                            od.getProductName(),
+                            od.getUnitPrice(),
+                            od.getPriceOffer(),
                             od.getQuantity()
                     );
                 }).toList();

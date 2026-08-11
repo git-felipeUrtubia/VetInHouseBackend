@@ -37,6 +37,9 @@ public class OrderDetailService {
 
                     return OrdersDetail.builder()
                             .productIdRef(prod.getProductId())
+                            .productName(prod.getName())
+                            .unitPrice(prod.getPrice())
+                            .priceOffer(prod.getPriceOffer())
                             .quantity(p.quantity())
                             .order(order)
                             .build();

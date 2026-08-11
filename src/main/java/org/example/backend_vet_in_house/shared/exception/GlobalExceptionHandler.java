@@ -7,6 +7,7 @@ import org.example.backend_vet_in_house.shared.exception.catalog.ProductNotFound
 import org.example.backend_vet_in_house.shared.exception.pet.PetAlreadyExistException;
 import org.example.backend_vet_in_house.shared.exception.pet.PetNotFoundException;
 import org.example.backend_vet_in_house.shared.exception.sales.*;
+import org.example.backend_vet_in_house.shared.exception.shipping.CommuneNotBelongToRegion;
 import org.example.backend_vet_in_house.shared.exception.user.UserAlreadyExistsException;
 import org.example.backend_vet_in_house.shared.exception.user.UserNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -175,6 +176,16 @@ public class GlobalExceptionHandler {
         response.put("message", ex.getMessage());
 
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(CommuneNotBelongToRegion.class)
+    public ResponseEntity<Map<String, String>> handleCommuneNotBelongToRegionException(CommuneNotBelongToRegion ex) {
+
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "not found");
+        response.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
 
 }
