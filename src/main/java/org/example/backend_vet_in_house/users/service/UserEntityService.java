@@ -47,14 +47,23 @@ public class UserEntityService {
 
             List<ItemsOrderResDTO> items = order.getOrdersDetails().stream().map(od -> {
 
-                Product prod = productRepository.findById(od.getProductIdRef())
-                        .orElseThrow(() -> new ProductNotFoundException("Product not found"));
-
-                return new ItemsOrderResDTO(prod.getName(), od.getQuantity());
+                return new ItemsOrderResDTO(
+                        od.getProductName(),
+                        od.getUnitPrice(),
+                        od.getPriceOffer(),
+                        od.getQuantity()
+                );
 
             }).toList();
 
-            return new ContentOrderResDTO(order.getCode(), items);
+            return new ContentOrderResDTO(
+                    order.getCode(),
+                    order.getSubtotal(),
+                    order.getShippingCost(),
+                    order.getTax(),
+                    order.getTotalAmount(),
+                    items
+            );
         }).toList();
 
         return new OrderHistoryResDTO(
