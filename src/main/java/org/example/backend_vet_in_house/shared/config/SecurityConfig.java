@@ -44,6 +44,9 @@ public class SecurityConfig {
                     http.requestMatchers("/api/v1/product/create").hasRole("ADMIN");
                     http.requestMatchers("/api/v1/product/find-all-admin").hasRole("ADMIN");
                     http.requestMatchers("/api/v1/product/find-all").permitAll();
+                    http.requestMatchers("/api/v1/product/update").hasRole("ADMIN");
+                    http.requestMatchers("/api/v1/product/delete").hasRole("ADMIN");
+
 
                     http.requestMatchers("/api/v1/orders/**").permitAll();
 

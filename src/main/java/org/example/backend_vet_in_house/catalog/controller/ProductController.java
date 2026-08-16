@@ -34,6 +34,11 @@ public class ProductController {
         return new ResponseEntity<>(productService.findProductByCode(code), HttpStatus.OK);
     }
 
+    @PutMapping("/update")
+    public ResponseEntity<?> updateProductByCode(@RequestBody CreateProductDTO req) {
+        return new ResponseEntity<>(productService.updateProductByCode(req), HttpStatus.OK);
+    }
+
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteProductByCode(@RequestParam String code) {
         productService.deleteProductByCode(code);

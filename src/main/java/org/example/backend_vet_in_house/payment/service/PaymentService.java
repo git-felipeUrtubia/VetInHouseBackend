@@ -5,14 +5,19 @@ import cl.transbank.webpay.common.WebpayOptions;
 import cl.transbank.webpay.webpayplus.WebpayPlus;
 import cl.transbank.webpay.webpayplus.responses.WebpayPlusTransactionCommitResponse;
 import cl.transbank.webpay.webpayplus.responses.WebpayPlusTransactionCreateResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PaymentService {
 
     // 1. Credenciales de INTEGRACIÓN (Pruebas) oficiales de Transbank para Webpay Plus
-    private final String apiKey = "579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C";
-    private final String commerceCode = "597055555532";
+
+    @Value("${transbank.api.key}")
+    private String apiKey;
+
+    @Value("${transbank.commerce.code}")
+    private String commerceCode;
 
     public WebpayPlusTransactionCreateResponse iniciarPago(
             String buyOrder,

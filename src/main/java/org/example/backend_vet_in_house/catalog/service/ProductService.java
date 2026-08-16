@@ -78,6 +78,33 @@ public class ProductService {
         productRepository.deleteProductByCode(code);
     }
 
+    public ProductResDTO updateProductByCode(CreateProductDTO req) {
+
+        Product prod = productRepository.findProductByCode(req.code())
+                        .orElseThrow(() -> new ProductNotFoundException("Product " + req.code() + " not found"));
+
+        prod.setName(req.name());
+        prod.setDescription(req.description());
+        prod.setPrice(req.price());
+        prod.setPriceOffer(req.priceOffer());
+        prod.setImage(req.image());
+        prod.setCategoria(Categoria.valueOf(req.categoria()));
+        prod.setStock(req.stock());
+
+        productRepository.save(prod);
+
+        return new ProductResDTO(
+                prod.getCode(),
+                prod.getName(),
+                prod.getDescription(),
+                prod.getPrice(),
+                prod.getPriceOffer(),
+                prod.getImage(),
+                prod.getCategoria().name()
+        );
+
+    }
+
     public List<ProductPanelAdminResDTO> findAllProductsAdmin() {
         return productRepository.findAll().stream()
                 .map(p -> new ProductPanelAdminResDTO(

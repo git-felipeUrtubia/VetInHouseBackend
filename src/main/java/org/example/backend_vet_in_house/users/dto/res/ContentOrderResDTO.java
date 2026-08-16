@@ -9,6 +9,6 @@ public record ContentOrderResDTO(
         BigDecimal shippingCost,
         BigDecimal tax,
         BigDecimal amount,
-        List<ItemsOrderResDTO> items
+        List<ItemsOrderResDTO> orderDetails
 ) {
 }

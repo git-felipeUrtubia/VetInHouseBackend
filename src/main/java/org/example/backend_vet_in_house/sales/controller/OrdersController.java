@@ -20,7 +20,7 @@ public class OrdersController {
     }
 
     @GetMapping("/find-all")
-    public ResponseEntity<?> findAll() {
+    public ResponseEntity<?> findAllOrders() {
         return new ResponseEntity<>(ordersService.findAllOrders(), HttpStatus.OK);
     }
 
