@@ -24,4 +24,9 @@ public class OrdersController {
         return new ResponseEntity<>(ordersService.findAllOrders(), HttpStatus.OK);
     }
 
+    @GetMapping("/find")
+    public ResponseEntity<?> findOrderByCode(@RequestParam String code) {
+        return new ResponseEntity<>(ordersService.findOrderByCode(code), HttpStatus.OK);
+    }
+
 }

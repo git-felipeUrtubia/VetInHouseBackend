@@ -12,6 +12,7 @@ import org.example.backend_vet_in_house.sales.model.*;
 import org.example.backend_vet_in_house.sales.repository.OrdersRepository;
 import org.example.backend_vet_in_house.shared.exception.catalog.ProductNotFoundException;
 import org.example.backend_vet_in_house.shared.exception.sales.OrderAlreadyExistsException;
+import org.example.backend_vet_in_house.shared.exception.sales.OrderNotFoundException;
 import org.example.backend_vet_in_house.shared.exception.shipping.CommuneNotBelongToRegion;
 import org.example.backend_vet_in_house.shared.exception.user.UserNotFoundException;
 import org.example.backend_vet_in_house.users.model.UserEntity;
@@ -168,4 +169,59 @@ public class OrdersService {
             }
         ).toList();
     }
+
+    public OrderResDTO findOrderByCode(String code) {
+        Orders order = ordersRepository.findOrderByCode(code)
+                .orElseThrow(() -> new OrderNotFoundException("Order " + code + " not found"));
+
+        List<OrderDetailResDTO> orderDetails = order.getOrdersDetails().stream()
+                .map(od -> new OrderDetailResDTO(
+                        od.getProductName(),
+                        od.getUnitPrice(),
+                        od.getPriceOffer(),
+                        od.getQuantity()
+                )).toList();
+
+        AddressResDTO address = new AddressResDTO(
+                order.getAddress().getCode(),
+                order.getAddress().getStreet(),
+                order.getAddress().getNumber()
+        );
+        CommuneResDTO commune = new CommuneResDTO(
+                order.getAddress().getCommune().getCode(),
+                order.getAddress().getCommune().getCommune()
+        );
+        RegionResDTO region = new RegionResDTO(
+                order.getAddress().getCommune().getRegion().getCode(),
+                order.getAddress().getCommune().getRegion().getRegion(),
+                order.getAddress().getCommune().getRegion().getShippingCost()
+        );
+
+        return new OrderResDTO(
+                order.getCode(),
+                order.getSubtotal(),
+                order.getTax(),
+                order.getShippingCost(),
+                order.getTotalAmount(),
+                order.getOrderStatus().name(),
+                order.getCreateAt(),
+                order.getUpdateAt(),
+                order.getPaidAt(),
+                orderDetails,
+                address,
+                commune,
+                region
+        );
+    }
 }
+
+
+
+
+
+
+
+
+
+
+

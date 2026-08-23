@@ -3,6 +3,7 @@ package org.example.backend_vet_in_house.appointments.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.backend_vet_in_house.appointments.dto.req.CreateAppointmentReqDTO;
+import org.example.backend_vet_in_house.appointments.dto.req.UpdateAppointmentReqDTO;
 import org.example.backend_vet_in_house.appointments.dto.res.AppointmentResDTO;
 import org.example.backend_vet_in_house.appointments.model.Appointment;
 import org.example.backend_vet_in_house.appointments.model.ServiceType;
@@ -11,6 +12,7 @@ import org.example.backend_vet_in_house.appointments.repository.AppointmentRepos
 import org.example.backend_vet_in_house.pets.model.Pet;
 import org.example.backend_vet_in_house.pets.repository.PetRepository;
 import org.example.backend_vet_in_house.shared.exception.appointment.AppointmentAlreadyExistException;
+import org.example.backend_vet_in_house.shared.exception.appointment.AppointmentNotFoundException;
 import org.example.backend_vet_in_house.shared.exception.pet.PetNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -77,5 +79,73 @@ public class AppointmentService {
                 }).toList();
 
     }
+
+    // 1. Buscar cita por código
+    public AppointmentResDTO findAppointmentByCode(String codeService) {
+        Appointment ap = appointmentRepository.findAppointmentByCode(codeService)
+                .orElseThrow(() -> new AppointmentNotFoundException("Appointment " + codeService + " not found"));
+
+        Pet pet = petRepository.findById(ap.getPetIdRef())
+                .orElseThrow(() -> new PetNotFoundException("Pet " + ap.getPetIdRef() + " not found"));
+
+        return new AppointmentResDTO(
+                pet.getPatientNumber(),
+                pet.getName(),
+                pet.getWeight(),
+                pet.getAge(),
+                ap.getCodeService(),
+                ap.getReasonForVisit(),
+                ap.getAppointmentDate(),
+                ap.getCreateAt(),
+                ap.getUpdateAt(),
+                ap.getServiceType().name(),
+                ap.getStatus().name()
+        );
+    }
+
+    // 2. Actualizar cita
+    @Transactional
+    public AppointmentResDTO updateAppointment(String codeService, UpdateAppointmentReqDTO req) {
+        Appointment ap = appointmentRepository.findAppointmentByCode(codeService)
+                .orElseThrow(() -> new AppointmentNotFoundException("Appointment " + codeService + " not found"));
+
+        // Actualizamos los campos permitidos
+        ap.setReasonForVisit(req.reasonForVisit());
+        ap.setAppointmentDate(req.appointmentDate());
+        ap.setUpdateAt(req.updateAt());
+        ap.setServiceType(ServiceType.valueOf(req.serviceType()));
+        ap.setStatus(Status.valueOf(req.status()));
+
+        appointmentRepository.save(ap);
+
+        // Obtenemos la mascota para retornar el DTO completo
+        Pet pet = petRepository.findById(ap.getPetIdRef())
+                .orElseThrow(() -> new PetNotFoundException("Pet " + ap.getPetIdRef() + " not found"));
+
+        return new AppointmentResDTO(
+                pet.getPatientNumber(),
+                pet.getName(),
+                pet.getWeight(),
+                pet.getAge(),
+                ap.getCodeService(),
+                ap.getReasonForVisit(),
+                ap.getAppointmentDate(),
+                ap.getCreateAt(),
+                ap.getUpdateAt(),
+                ap.getServiceType().name(),
+                ap.getStatus().name()
+        );
+    }
+
+    // 3. Eliminar cita
+    @Transactional
+    public void deleteAppointment(String codeService) {
+        Appointment ap = appointmentRepository.findAppointmentByCode(codeService)
+                .orElseThrow(() -> new AppointmentNotFoundException("Appointment " + codeService + " not found"));
+
+        appointmentRepository.delete(ap);
+    }
+
+
 
 }
