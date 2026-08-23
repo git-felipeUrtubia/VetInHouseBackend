@@ -20,7 +20,7 @@ INSERT INTO role_permission(role_id, permission_id) VALUES (2, 4);
 
 -- CREAR SUPER-USUARIO
 INSERT INTO user(user_id, first_name, last_name, username, password, is_account_no_expired, is_account_no_locked, is_credentials_no_expired, is_enabled)
-VALUES (1, 'Felipe', 'Urtubia', 'fe.urtubia@gmail.com', '12345', true, true, true, true);
+VALUES (1, 'Felipe', 'Urtubia', 'fe.urtubia@gmail.com', '$2a$12$FXzk5nRmDbVujpHpotcFR.3NpvFIsa/rU2hIrUXo3qhEGDHHb4IhK', true, true, true, true);
 
 -- ASIGNAR ROLE A SUPER-USUARIO
 INSERT INTO user_role(user_id, role_id) VALUES (1, 2);

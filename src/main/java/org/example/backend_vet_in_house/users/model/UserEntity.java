@@ -3,6 +3,7 @@ package org.example.backend_vet_in_house.users.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -43,6 +44,12 @@ public class UserEntity {
 
     @Column(name = "is_enabled")
     private boolean isEnabled;
+
+    @Column(name = "verification_code")
+    private String verificationCode;
+
+    @Column(name = "verification_code_expires_at")
+    private LocalDateTime verificationCodeExpiresAt;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(

@@ -35,6 +35,7 @@ public class AuthService {
     private final UserEntityRepository userEntityRepository;
     private final RoleEntityRepository roleEntityRepository;
     private final JwtUtil jwtUtil;
+    private final EmailService emailService;
 
     public String registerUser(RegisterReqDTO req) throws RoleNotFoundException {
 
@@ -101,6 +102,52 @@ public class AuthService {
         }
 
         return new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
+    }
+
+    public String forgotPassword(String username) {
+        UserEntity user = userEntityRepository.findUserByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+
+        // Generamos un código numérico aleatorio de 6 dígitos
+        String code = String.format("%06d", new java.util.Random().nextInt(999999));
+
+        user.setVerificationCode(code);
+        user.setVerificationCodeExpiresAt(java.time.LocalDateTime.now().plusMinutes(3)); // Expira en 15 min
+        userEntityRepository.save(user);
+
+        emailService.sendPasswordResetCode(user.getUsername(), code);
+        return "Código enviado exitosamente al correo.";
+    }
+
+    public boolean verifyCode(String username, String code) {
+        UserEntity user = userEntityRepository.findUserByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+
+        if (user.getVerificationCode() == null || !user.getVerificationCode().equals(code)) {
+            throw new IllegalArgumentException("Código inválido o incorrecto");
+        }
+
+        if (user.getVerificationCodeExpiresAt().isBefore(java.time.LocalDateTime.now())) {
+            throw new IllegalArgumentException("El código ha expirado. Solicita uno nuevo.");
+        }
+
+        return true;
+    }
+
+    public String resetPassword(String username, String code, String newPassword) {
+        verifyCode(username, code); // Reutilizamos la validación por seguridad
+
+        UserEntity user = userEntityRepository.findUserByUsername(username).get();
+
+        // Guardamos la nueva contraseña (encriptada como ya lo manejas)
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        // Limpiamos los campos de recuperación para que no puedan reusar el código
+        user.setVerificationCode(null);
+        user.setVerificationCodeExpiresAt(null);
+        userEntityRepository.save(user);
+
+        return "Contraseña actualizada con éxito.";
     }
 
 }

@@ -14,6 +14,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -40,6 +41,9 @@ public class SecurityConfig {
 
                     http.requestMatchers(HttpMethod.POST, "/api/v1/auth/register").permitAll();
                     http.requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll();
+                    http.requestMatchers(HttpMethod.POST, "/api/v1/auth/forgot-password").permitAll();
+                    http.requestMatchers(HttpMethod.POST, "/api/v1/auth/verify-code").permitAll();
+                    http.requestMatchers(HttpMethod.POST, "/api/v1/auth/reset-password").permitAll();
 
                     http.requestMatchers("/api/v1/product/create").hasRole("ADMIN");
                     http.requestMatchers("/api/v1/product/find-all-admin").hasRole("ADMIN");
@@ -94,7 +98,7 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance();
+        return new BCryptPasswordEncoder();
     }
 
 }
