@@ -41,10 +41,6 @@ public class UserEntityService {
 
         List<Orders> orders = ordersRepository.findOrderByUser(user.getUserId());
 
-        if(orders.isEmpty()) {
-            throw new OrderByUserIdNotFoundException("User have not orders");
-        }
-
         List<ContentOrderResDTO> contentsOrder = orders.stream().map(order -> {
 
             List<ItemsOrderResDTO> items = order.getOrdersDetails().stream().map(od -> {

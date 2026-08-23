@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.backend_vet_in_house.users.dto.req.*;
 import org.example.backend_vet_in_house.users.dto.res.LoginResDTO;
 import org.example.backend_vet_in_house.users.service.AuthService;
+import org.example.backend_vet_in_house.users.service.EmailService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +21,7 @@ import javax.management.relation.RoleNotFoundException;
 public class AuthController {
 
     private final AuthService authService;
+    private final EmailService emailService;
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterReqDTO req) throws RoleNotFoundException {
@@ -57,6 +59,16 @@ public class AuthController {
             return new ResponseEntity<>(authService.resetPassword(req.username(), req.code(), req.newPassword()), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/contact")
+    public ResponseEntity<?> receiveContactForm(@Valid @RequestBody ContactReqDTO req) {
+        try {
+            emailService.sendContactEmail(req.nombre(), req.correo(), req.mascota(), req.mensaje());
+            return new ResponseEntity<>("Mensaje enviado con éxito", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error al enviar el mensaje", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
