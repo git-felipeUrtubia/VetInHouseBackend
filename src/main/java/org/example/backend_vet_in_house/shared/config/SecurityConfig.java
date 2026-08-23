@@ -66,6 +66,8 @@ public class SecurityConfig {
 
                     http.requestMatchers("/api/v1/appointment/**").permitAll();
 
+                    http.requestMatchers("/api/v1/appointment-result/**").permitAll();
+
                     http.requestMatchers("/api/v1/address/**").permitAll();
                     http.requestMatchers("/api/v1/commune/**").permitAll();
                     http.requestMatchers("/api/v1/region/**").permitAll();

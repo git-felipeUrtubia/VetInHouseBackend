@@ -2,6 +2,7 @@ package org.example.backend_vet_in_house.shared.exception;
 
 import org.example.backend_vet_in_house.shared.exception.appointment.AppointmentAlreadyExistException;
 import org.example.backend_vet_in_house.shared.exception.appointment.AppointmentNotFoundException;
+import org.example.backend_vet_in_house.shared.exception.appointment.AppointmentResultNotFoundException;
 import org.example.backend_vet_in_house.shared.exception.catalog.InsufficientStockException;
 import org.example.backend_vet_in_house.shared.exception.catalog.ProductAlreadyExistsException;
 import org.example.backend_vet_in_house.shared.exception.catalog.ProductNotFoundException;
@@ -191,6 +192,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AppointmentNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleAppointmentNotFoundException(AppointmentNotFoundException ex) {
+
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "not found");
+        response.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(AppointmentResultNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleAppointmentResultNotFoundException(AppointmentResultNotFoundException ex) {
 
         Map<String, String> response = new HashMap<>();
         response.put("error", "not found");

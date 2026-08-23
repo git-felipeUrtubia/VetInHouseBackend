@@ -47,4 +47,7 @@ public class Appointment {
 
     @Enumerated(EnumType.STRING)
     private Status status;
+
+    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private AppointmentResult appointmentResult;
 }

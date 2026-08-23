@@ -2,7 +2,9 @@ package org.example.backend_vet_in_house.users.service;
 
 
 import lombok.RequiredArgsConstructor;
+import org.example.backend_vet_in_house.appointments.dto.res.AppointmentResultResDTO;
 import org.example.backend_vet_in_house.appointments.repository.AppointmentRepository;
+import org.example.backend_vet_in_house.appointments.repository.AppointmentResultRepository;
 import org.example.backend_vet_in_house.catalog.model.Product;
 import org.example.backend_vet_in_house.catalog.repository.ProductRepository;
 import org.example.backend_vet_in_house.pets.model.Pet;
@@ -27,10 +29,10 @@ public class UserEntityService {
 
     private final UserEntityRepository userEntityRepository;
     private final OrdersRepository ordersRepository;
-    private final ProductRepository productRepository;
 
     private final AppointmentRepository appointmentRepository;
     private final PetRepository petRepository;
+    private final AppointmentResultRepository appointmentResultRepository;
 
     public OrderHistoryResDTO getOrderHistoryByUser(String username) {
 
@@ -76,7 +78,6 @@ public class UserEntityService {
     }
 
     public AppointmentFromUserResDTO getAppointmentByUsername(String username) {
-
         UserEntity user = userEntityRepository.findUserByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("User " + username + " not found"));
 
@@ -84,23 +85,35 @@ public class UserEntityService {
 
         List<ItemPetFromUserResDTO> itemsPet = pets.stream()
                 .map(pet -> {
-
                     List<ItemAppointmentFromUserResDTO> itemsAp = appointmentRepository
                             .findAllByPet(pet.getPetId()).stream()
-                            .map(it -> new ItemAppointmentFromUserResDTO(
-                                    it.getCodeService(),
-                                    it.getServiceType().name(),
-                                    it.getAppointmentDate(),
-                                    it.getCreateAt(),
-                                    it.getStatus().name()
-                            )).toList();
+                            .map(it -> {
+
+                                AppointmentResultResDTO resultDto = appointmentResultRepository
+                                        .findByAppointment_AppointmentId(it.getAppointmentId())
+                                        .map(res -> new AppointmentResultResDTO(
+                                                it.getCodeService(),
+                                                res.getDiagnosis(),
+                                                res.getTreatment(),
+                                                res.getCreatedAt()
+                                        )).orElse(null);
+
+                                return new ItemAppointmentFromUserResDTO(
+                                        it.getCodeService(),
+                                        it.getServiceType().name(),
+                                        it.getAppointmentDate(),
+                                        it.getCreateAt(),
+                                        it.getStatus().name(),
+                                        resultDto
+                                );
+
+                            }).toList();
 
                     return new ItemPetFromUserResDTO(
                             pet.getPatientNumber(),
                             pet.getName(),
                             itemsAp
                     );
-
                 }).toList();
 
         return new AppointmentFromUserResDTO(
