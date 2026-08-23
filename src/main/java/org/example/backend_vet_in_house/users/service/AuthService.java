@@ -3,6 +3,7 @@ package org.example.backend_vet_in_house.users.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.backend_vet_in_house.shared.exception.user.UserAlreadyExistsException;
+import org.example.backend_vet_in_house.shared.exception.user.UserNotFoundException;
 import org.example.backend_vet_in_house.users.dto.res.RoleResDTO;
 import org.example.backend_vet_in_house.utils.JwtUtil;
 import org.example.backend_vet_in_house.users.dto.req.LoginReqDTO;
@@ -137,7 +138,8 @@ public class AuthService {
     public String resetPassword(String username, String code, String newPassword) {
         verifyCode(username, code); // Reutilizamos la validación por seguridad
 
-        UserEntity user = userEntityRepository.findUserByUsername(username).get();
+        UserEntity user = userEntityRepository.findUserByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User " + username + " not found"));
 
         // Guardamos la nueva contraseña (encriptada como ya lo manejas)
         user.setPassword(passwordEncoder.encode(newPassword));
@@ -148,6 +150,57 @@ public class AuthService {
         userEntityRepository.save(user);
 
         return "Contraseña actualizada con éxito.";
+    }
+
+    // 1. SOLICITAR EL CAMBIO DE CORREO
+    public String requestEmailUpdate(String currentEmail, String newEmail) {
+        // Verificar que el nuevo correo no esté ya registrado por otra persona
+        if (userEntityRepository.existsByUsername(newEmail)) {
+            throw new IllegalArgumentException("El correo ingresado ya está en uso por otra cuenta.");
+        }
+
+        UserEntity user = userEntityRepository.findUserByUsername(currentEmail)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        // Generar código de 6 dígitos
+        String code = String.format("%06d", new java.util.Random().nextInt(999999));
+
+        // Guardar estado temporal
+        user.setPendingNewEmail(newEmail);
+        user.setEmailUpdateCode(code);
+        user.setEmailUpdateCodeExpiresAt(java.time.LocalDateTime.now().plusMinutes(15));
+
+        userEntityRepository.save(user);
+
+        // Enviar el correo al NUEVO email
+        emailService.sendEmailUpdateCode(newEmail, code);
+
+        return "Código de verificación enviado al nuevo correo.";
+    }
+
+    // 2. VERIFICAR CÓDIGO Y APLICAR EL CAMBIO
+    public String verifyAndApplyEmailUpdate(String currentEmail, String code) {
+        UserEntity user = userEntityRepository.findUserByUsername(currentEmail)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        if (user.getEmailUpdateCode() == null || !user.getEmailUpdateCode().equals(code)) {
+            throw new IllegalArgumentException("Código inválido o incorrecto.");
+        }
+
+        if (user.getEmailUpdateCodeExpiresAt().isBefore(java.time.LocalDateTime.now())) {
+            throw new IllegalArgumentException("El código ha expirado. Solicita uno nuevo.");
+        }
+
+        user.setUsername(user.getPendingNewEmail());
+
+        // Limpiamos los campos temporales
+        user.setPendingNewEmail(null);
+        user.setEmailUpdateCode(null);
+        user.setEmailUpdateCodeExpiresAt(null);
+
+        userEntityRepository.save(user);
+
+        return "Correo actualizado con éxito.";
     }
 
 }

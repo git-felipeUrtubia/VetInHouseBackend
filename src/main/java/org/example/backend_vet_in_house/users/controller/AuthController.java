@@ -8,10 +8,7 @@ import org.example.backend_vet_in_house.users.service.AuthService;
 import org.example.backend_vet_in_house.users.service.EmailService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.management.relation.RoleNotFoundException;
 
@@ -69,6 +66,24 @@ public class AuthController {
             return new ResponseEntity<>("Mensaje enviado con éxito", HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("Error al enviar el mensaje", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/request-email-update")
+    public ResponseEntity<?> requestEmailUpdate(@Valid @RequestBody RequestEmailUpdateReqDTO req) {
+        try {
+            return new ResponseEntity<>(authService.requestEmailUpdate(req.currentEmail(), req.newEmail()), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PutMapping("/verify-email-update")
+    public ResponseEntity<?> verifyEmailUpdate(@Valid @RequestBody VerifyEmailUpdateReqDTO req) {
+        try {
+            return new ResponseEntity<>(authService.verifyAndApplyEmailUpdate(req.currentEmail(), req.code()), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 

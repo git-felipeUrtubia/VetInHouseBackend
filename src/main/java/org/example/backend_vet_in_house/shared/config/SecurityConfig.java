@@ -44,7 +44,8 @@ public class SecurityConfig {
                     http.requestMatchers(HttpMethod.POST, "/api/v1/auth/forgot-password").permitAll();
                     http.requestMatchers(HttpMethod.POST, "/api/v1/auth/verify-code").permitAll();
                     http.requestMatchers(HttpMethod.POST, "/api/v1/auth/reset-password").permitAll();
-                    http.requestMatchers(HttpMethod.POST, "/api/v1/auth/contact").permitAll();
+                    http.requestMatchers(HttpMethod.POST, "/api/v1/auth/request-email-update").permitAll();
+                    http.requestMatchers(HttpMethod.POST, "/api/v1/auth/verify-email-update").permitAll();
 
                     http.requestMatchers("/api/v1/product/create").hasRole("ADMIN");
                     http.requestMatchers("/api/v1/product/find-all-admin").hasRole("ADMIN");

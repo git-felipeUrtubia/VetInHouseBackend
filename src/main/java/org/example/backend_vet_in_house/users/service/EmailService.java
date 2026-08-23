@@ -38,4 +38,13 @@ public class EmailService {
         );
         mailSender.send(mailMessage);
     }
+
+    public void sendEmailUpdateCode(String to, String code) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to); // Se envía al NUEVO correo
+        message.setSubject("Código de verificación - Cambio de correo");
+        message.setText("Tu código para confirmar el cambio de correo es: " + code +
+                "\nEste código expira en 15 minutos. Si no solicitaste esto, ignora este mensaje.");
+        mailSender.send(message);
+    }
 }

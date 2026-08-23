@@ -45,11 +45,22 @@ public class UserEntity {
     @Column(name = "is_enabled")
     private boolean isEnabled;
 
+
     @Column(name = "verification_code")
     private String verificationCode;
 
     @Column(name = "verification_code_expires_at")
     private LocalDateTime verificationCodeExpiresAt;
+
+    @Column(name = "pending_new_email")
+    private String pendingNewEmail;
+
+    @Column(name = "email_update_code")
+    private String emailUpdateCode;
+
+    @Column(name = "email_update_code_expires_at")
+    private LocalDateTime emailUpdateCodeExpiresAt;
+
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
