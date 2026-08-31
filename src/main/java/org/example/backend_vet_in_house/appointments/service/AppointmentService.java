@@ -26,6 +26,7 @@ public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final PetRepository petRepository;
 
+    @Transactional
     public String createAppointment(CreateAppointmentReqDTO req) {
 
         Pet pet = petRepository.findPetByPatientNumber(req.patientNumber())
@@ -146,6 +147,34 @@ public class AppointmentService {
         appointmentRepository.delete(ap);
     }
 
+    // 4. Cambiar estado de la cita
+    @Transactional
+    public AppointmentResDTO updateAppointmentStatus(String codeService, String newStatus) {
+        Appointment ap = appointmentRepository.findAppointmentByCode(codeService)
+                .orElseThrow(() -> new AppointmentNotFoundException("Appointment " + codeService + " not found"));
+
+        // Convertimos el string entrante al Enum correspondiente
+        ap.setStatus(Status.valueOf(newStatus.toUpperCase()));
+        appointmentRepository.save(ap);
+
+        // Obtenemos la mascota para retornar el DTO completo
+        Pet pet = petRepository.findById(ap.getPetIdRef())
+                .orElseThrow(() -> new PetNotFoundException("Pet " + ap.getPetIdRef() + " not found"));
+
+        return new AppointmentResDTO(
+                pet.getPatientNumber(),
+                pet.getName(),
+                pet.getWeight(),
+                pet.getAge(),
+                ap.getCodeService(),
+                ap.getReasonForVisit(),
+                ap.getAppointmentDate(),
+                ap.getCreateAt(),
+                ap.getUpdateAt(),
+                ap.getServiceType().name(),
+                ap.getStatus().name()
+        );
+    }
 
 
 }

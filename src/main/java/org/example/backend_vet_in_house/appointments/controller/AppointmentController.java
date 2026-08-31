@@ -43,4 +43,11 @@ public class AppointmentController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @PatchMapping("/change-status")
+    public ResponseEntity<?> changeAppointmentStatus(
+            @RequestParam String codeService,
+            @RequestParam String status) {
+        return new ResponseEntity<>(appointmentService.updateAppointmentStatus(codeService, status), HttpStatus.OK);
+    }
+
 }

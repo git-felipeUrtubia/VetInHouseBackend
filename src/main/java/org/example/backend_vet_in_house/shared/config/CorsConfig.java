@@ -18,7 +18,7 @@ public class CorsConfig {
 
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
 
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
 
         // 3. Cabeceras permitidas (El "*" es vital para recibir el token JWT en el header 'Authorization')
         configuration.setAllowedHeaders(List.of("*"));

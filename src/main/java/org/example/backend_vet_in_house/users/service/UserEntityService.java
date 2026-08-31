@@ -3,6 +3,7 @@ package org.example.backend_vet_in_house.users.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.backend_vet_in_house.appointments.dto.res.AppointmentResultResDTO;
+import org.example.backend_vet_in_house.appointments.model.Appointment;
 import org.example.backend_vet_in_house.appointments.repository.AppointmentRepository;
 import org.example.backend_vet_in_house.appointments.repository.AppointmentResultRepository;
 import org.example.backend_vet_in_house.catalog.model.Product;
@@ -21,6 +22,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -77,40 +80,48 @@ public class UserEntityService {
         UserEntity user = userEntityRepository.findUserByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("User " + username + " not found"));
 
+        // 1. Obtener las mascotas y sus IDs
         List<Pet> pets = petRepository.findPetsByUserId(user.getUserId());
+        List<Long> petIds = pets.stream().map(Pet::getPetId).toList();
 
-        List<ItemPetFromUserResDTO> itemsPet = pets.stream()
-                .map(pet -> {
-                    List<ItemAppointmentFromUserResDTO> itemsAp = appointmentRepository
-                            .findAllByPet(pet.getPetId()).stream()
-                            .map(it -> {
+        // 2. Obtener todas las citas + resultados en UNA sola consulta
+        List<Appointment> allAppointments = petIds.isEmpty() ?
+                List.of() :
+                appointmentRepository.findAllByPetIdsWithResults(petIds);
 
-                                AppointmentResultResDTO resultDto = appointmentResultRepository
-                                        .findByAppointment_AppointmentId(it.getAppointmentId())
-                                        .map(res -> new AppointmentResultResDTO(
-                                                it.getCodeService(),
-                                                res.getDiagnosis(),
-                                                res.getTreatment(),
-                                                res.getCreatedAt()
-                                        )).orElse(null);
+        // 3. Agrupar las citas por el ID de la mascota en memoria
+        Map<Long, List<Appointment>> appointmentsByPetId = allAppointments.stream()
+                .collect(Collectors.groupingBy(Appointment::getPetIdRef));
 
-                                return new ItemAppointmentFromUserResDTO(
-                                        it.getCodeService(),
-                                        it.getServiceType().name(),
-                                        it.getAppointmentDate(),
-                                        it.getCreateAt(),
-                                        it.getStatus().name(),
-                                        resultDto
-                                );
+        // 4. Mapear a DTOs sin hacer nuevas consultas a BD
+        List<ItemPetFromUserResDTO> itemsPet = pets.stream().map(pet -> {
+            List<Appointment> petAppointments = appointmentsByPetId.getOrDefault(pet.getPetId(), List.of());
 
-                            }).toList();
+            List<ItemAppointmentFromUserResDTO> itemsAp = petAppointments.stream().map(it -> {
+                AppointmentResultResDTO resultDto = it.getAppointmentResult() != null ?
+                        new AppointmentResultResDTO(
+                                it.getCodeService(),
+                                it.getAppointmentResult().getDiagnosis(),
+                                it.getAppointmentResult().getTreatment(),
+                                it.getAppointmentResult().getCreatedAt()
+                        ) : null;
 
-                    return new ItemPetFromUserResDTO(
-                            pet.getPatientNumber(),
-                            pet.getName(),
-                            itemsAp
-                    );
-                }).toList();
+                return new ItemAppointmentFromUserResDTO(
+                        it.getCodeService(),
+                        it.getServiceType().name(),
+                        it.getAppointmentDate(),
+                        it.getCreateAt(),
+                        it.getStatus().name(),
+                        resultDto
+                );
+            }).toList();
+
+            return new ItemPetFromUserResDTO(
+                    pet.getPatientNumber(),
+                    pet.getName(),
+                    itemsAp
+            );
+        }).toList();
 
         return new AppointmentFromUserResDTO(
                 user.getFirstName(),
