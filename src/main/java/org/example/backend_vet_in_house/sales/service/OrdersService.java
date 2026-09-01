@@ -18,6 +18,7 @@ import org.example.backend_vet_in_house.shared.exception.user.UserNotFoundExcept
 import org.example.backend_vet_in_house.users.model.UserEntity;
 import org.example.backend_vet_in_house.users.repository.UserEntityRepository;
 import org.example.backend_vet_in_house.users.service.UserEntityService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -36,6 +37,9 @@ public class OrdersService {
     private final AddressService addressService;
     private final CommuneService communeService;
     private final RegionService regionService;
+
+    @Value("${spring.iva.factor}")
+    private float iva_factor;
 
     @Transactional
     public String createOrder(CreateOrderReqDTO req) {
@@ -79,7 +83,7 @@ public class OrdersService {
         BigDecimal shippingCost = region.getShippingCost();
         BigDecimal totalAmount = subtotal.add(shippingCost);
 
-        BigDecimal ivaFactor = new BigDecimal("1.19");
+        BigDecimal ivaFactor = new BigDecimal(iva_factor);
         BigDecimal valueNeto = totalAmount.divide(ivaFactor, 0, RoundingMode.HALF_UP);
         BigDecimal tax = totalAmount.subtract(valueNeto);
 
