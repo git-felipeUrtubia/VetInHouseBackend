@@ -57,6 +57,7 @@ public class SecurityConfig {
                     http.requestMatchers("/api/v1/orders/create").authenticated();
                     http.requestMatchers("/api/v1/orders/find-all").hasRole("ADMIN");
                     http.requestMatchers("/api/v1/orders/find").authenticated();
+                    http.requestMatchers(HttpMethod.PATCH, "/api/v1/orders/change-status").hasRole("ADMIN");
 
 
                     http.requestMatchers("/api/v1/user/find/order-history").authenticated();

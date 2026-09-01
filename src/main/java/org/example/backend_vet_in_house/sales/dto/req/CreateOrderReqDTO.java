@@ -8,6 +8,7 @@ import java.util.List;
 public record CreateOrderReqDTO(
         String code,
         String username,
+        String phone,
         String orderStatus,
         LocalDateTime createAt,
         LocalDateTime updateAt,

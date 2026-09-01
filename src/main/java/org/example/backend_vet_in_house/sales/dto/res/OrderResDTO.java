@@ -8,6 +8,8 @@ import java.util.List;
 
 @JsonPropertyOrder({
         "code",
+        "phone",
+        "email",
         "subtotal",
         "tax",
         "shippingCost",
@@ -20,6 +22,8 @@ import java.util.List;
 })
 public record OrderResDTO(
         String code,
+        String phone,
+        String email,
         BigDecimal subtotal,
         BigDecimal tax,
         BigDecimal shippingCost,

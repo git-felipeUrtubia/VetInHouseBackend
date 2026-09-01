@@ -29,4 +29,11 @@ public class OrdersController {
         return new ResponseEntity<>(ordersService.findOrderByCode(code), HttpStatus.OK);
     }
 
+    @PatchMapping("/change-status")
+    public ResponseEntity<?> changeOrderStatus(
+            @RequestParam String code,
+            @RequestParam String status) {
+        return new ResponseEntity<>(ordersService.updateOrderStatus(code, status), HttpStatus.OK);
+    }
+
 }

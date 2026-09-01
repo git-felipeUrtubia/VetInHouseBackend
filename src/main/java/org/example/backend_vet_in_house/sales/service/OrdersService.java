@@ -17,6 +17,7 @@ import org.example.backend_vet_in_house.shared.exception.shipping.CommuneNotBelo
 import org.example.backend_vet_in_house.shared.exception.user.UserNotFoundException;
 import org.example.backend_vet_in_house.users.model.UserEntity;
 import org.example.backend_vet_in_house.users.repository.UserEntityRepository;
+import org.example.backend_vet_in_house.users.service.UserEntityService;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -94,6 +95,7 @@ public class OrdersService {
 
         Orders order = ordersRepository.save(Orders.builder()
                 .code(req.code())
+                .phone(req.phone())
                 .userIdRef(user.getUserId())
                 .subtotal( orderTotals.subtotal() )
                 .tax( orderTotals.tax() )
@@ -121,6 +123,7 @@ public class OrdersService {
         return "Order created with successfully";
     }
 
+    @Transactional
     public List<OrderResDTO> findAllOrders() {
 
         return ordersRepository.findAll().stream()
@@ -151,8 +154,13 @@ public class OrdersService {
                         order.getAddress().getCommune().getRegion().getShippingCost()
                 );
 
+                UserEntity user = userEntityRepository.findById(order.getUserIdRef())
+                        .orElseThrow(() -> new UserNotFoundException("User " + order.getUserIdRef() + " not found"));
+
                 return new OrderResDTO(
                         order.getCode(),
+                        order.getPhone(),
+                        user.getUsername(),
                         order.getSubtotal(),
                         order.getTax(),
                         order.getShippingCost(),
@@ -170,6 +178,7 @@ public class OrdersService {
         ).toList();
     }
 
+    @Transactional
     public OrderResDTO findOrderByCode(String code) {
         Orders order = ordersRepository.findOrderByCode(code)
                 .orElseThrow(() -> new OrderNotFoundException("Order " + code + " not found"));
@@ -197,8 +206,13 @@ public class OrdersService {
                 order.getAddress().getCommune().getRegion().getShippingCost()
         );
 
+        UserEntity user = userEntityRepository.findById(order.getUserIdRef())
+                .orElseThrow(() -> new UserNotFoundException("User " + order.getUserIdRef() + " not found"));
+
         return new OrderResDTO(
                 order.getCode(),
+                order.getPhone(),
+                user.getUsername(),
                 order.getSubtotal(),
                 order.getTax(),
                 order.getShippingCost(),
@@ -212,6 +226,17 @@ public class OrdersService {
                 commune,
                 region
         );
+    }
+
+    @Transactional
+    public OrderResDTO updateOrderStatus(String code, String newStatus) {
+        Orders order = ordersRepository.findOrderByCode(code)
+                .orElseThrow(() -> new OrderNotFoundException("Order " + code + " not found"));
+
+        order.setOrderStatus(OrderStatus.valueOf(newStatus.toUpperCase()));
+        ordersRepository.save(order);
+
+        return findOrderByCode(code);
     }
 }
 

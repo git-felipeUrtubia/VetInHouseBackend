@@ -30,6 +30,8 @@ public class Orders {
     @Column(name = "user_id_ref")
     private Long userIdRef;
 
+    private String phone;
+
     private BigDecimal subtotal;
 
     private BigDecimal tax;
