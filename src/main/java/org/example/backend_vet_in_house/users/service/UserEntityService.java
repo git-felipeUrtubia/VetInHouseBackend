@@ -5,15 +5,10 @@ import lombok.RequiredArgsConstructor;
 import org.example.backend_vet_in_house.appointments.dto.res.AppointmentResultResDTO;
 import org.example.backend_vet_in_house.appointments.model.Appointment;
 import org.example.backend_vet_in_house.appointments.repository.AppointmentRepository;
-import org.example.backend_vet_in_house.appointments.repository.AppointmentResultRepository;
-import org.example.backend_vet_in_house.catalog.model.Product;
-import org.example.backend_vet_in_house.catalog.repository.ProductRepository;
 import org.example.backend_vet_in_house.pets.model.Pet;
 import org.example.backend_vet_in_house.pets.repository.PetRepository;
 import org.example.backend_vet_in_house.sales.model.Orders;
 import org.example.backend_vet_in_house.sales.repository.OrdersRepository;
-import org.example.backend_vet_in_house.shared.exception.catalog.ProductNotFoundException;
-import org.example.backend_vet_in_house.shared.exception.sales.OrderByUserIdNotFoundException;
 import org.example.backend_vet_in_house.shared.exception.user.UserNotFoundException;
 import org.example.backend_vet_in_house.users.dto.res.*;
 import org.example.backend_vet_in_house.users.model.UserEntity;
@@ -35,7 +30,6 @@ public class UserEntityService {
 
     private final AppointmentRepository appointmentRepository;
     private final PetRepository petRepository;
-    private final AppointmentResultRepository appointmentResultRepository;
 
     public OrderHistoryResDTO getOrderHistoryByUser(String username) {
 

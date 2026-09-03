@@ -5,6 +5,7 @@ import cl.transbank.webpay.webpayplus.responses.WebpayPlusTransactionCreateRespo
 import lombok.RequiredArgsConstructor;
 import org.example.backend_vet_in_house.payment.dto.req.PaymentReqDTO;
 import org.example.backend_vet_in_house.payment.service.PaymentService;
+import org.example.backend_vet_in_house.sales.model.OrderStatus;
 import org.example.backend_vet_in_house.sales.service.OrdersService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,8 +40,11 @@ public class PaymentController {
         try {
             WebpayPlusTransactionCommitResponse response = paymentService.confirmarPago(token);
 
-            // Aquí en el futuro puedes hacer un if(response.getResponseCode() == 0)
-            // para actualizar tu tabla Orders y cambiar el OrderStatus a PAID.
+            if(response.getResponseCode() == 0) {
+                ordersService.updateOrderStatus(response.getBuyOrder(), OrderStatus.PAID);
+            }else {
+                ordersService.updateOrderStatus(response.getBuyOrder(), OrderStatus.CANCELLED);
+            }
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {

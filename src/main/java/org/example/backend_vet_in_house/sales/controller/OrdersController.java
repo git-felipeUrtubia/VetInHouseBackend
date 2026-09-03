@@ -2,9 +2,11 @@ package org.example.backend_vet_in_house.sales.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.backend_vet_in_house.sales.dto.req.CreateOrderReqDTO;
+import org.example.backend_vet_in_house.sales.model.OrderStatus;
 import org.example.backend_vet_in_house.sales.service.OrdersService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,8 +17,9 @@ public class OrdersController {
     private final OrdersService ordersService;
 
     @PostMapping("/create")
-    public ResponseEntity<?> createOrder(@RequestBody CreateOrderReqDTO req) {
-        return new ResponseEntity<>(ordersService.createOrder(req), HttpStatus.CREATED);
+    public ResponseEntity<?> createOrder(@RequestBody CreateOrderReqDTO req, Authentication authentication) {
+        String username = authentication.getName();
+        return new ResponseEntity<>(ordersService.createOrder(req, username), HttpStatus.CREATED);
     }
 
     @GetMapping("/find-all")
@@ -32,7 +35,7 @@ public class OrdersController {
     @PatchMapping("/change-status")
     public ResponseEntity<?> changeOrderStatus(
             @RequestParam String code,
-            @RequestParam String status) {
+            @RequestParam OrderStatus status) {
         return new ResponseEntity<>(ordersService.updateOrderStatus(code, status), HttpStatus.OK);
     }
 

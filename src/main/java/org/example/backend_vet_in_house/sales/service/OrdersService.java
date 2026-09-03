@@ -19,10 +19,12 @@ import org.example.backend_vet_in_house.users.model.UserEntity;
 import org.example.backend_vet_in_house.users.repository.UserEntityRepository;
 import org.example.backend_vet_in_house.users.service.UserEntityService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,10 +44,10 @@ public class OrdersService {
     private float iva_factor;
 
     @Transactional
-    public String createOrder(CreateOrderReqDTO req) {
+    public String createOrder(CreateOrderReqDTO req, String username) {
 
-        UserEntity user = userEntityRepository.findUserByUsername(req.username())
-                .orElseThrow(() -> new UserNotFoundException("User " + req.username() + " not found"));
+        UserEntity user = userEntityRepository.findUserByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User " + username + " not found"));
         boolean checkOrder = ordersRepository.findOrderByCode(req.code()).isPresent();
 
 
@@ -94,9 +96,6 @@ public class OrdersService {
                 totalAmount
         );
 
-
-
-
         Orders order = ordersRepository.save(Orders.builder()
                 .code(req.code())
                 .phone(req.phone())
@@ -105,7 +104,7 @@ public class OrdersService {
                 .tax( orderTotals.tax() )
                 .shippingCost( orderTotals.shippingCost() )
                 .totalAmount( orderTotals.totalAmount() )
-                .orderStatus(OrderStatus.valueOf(req.orderStatus()))
+                .orderStatus(OrderStatus.PENDING)
                 .createAt(req.createAt())
                 .updateAt(req.updateAt())
                 .paidAt(req.paidAt())
@@ -233,14 +232,40 @@ public class OrdersService {
     }
 
     @Transactional
-    public OrderResDTO updateOrderStatus(String code, String newStatus) {
+    public OrderResDTO updateOrderStatus(String code, OrderStatus newStatus) {
         Orders order = ordersRepository.findOrderByCode(code)
                 .orElseThrow(() -> new OrderNotFoundException("Order " + code + " not found"));
 
-        order.setOrderStatus(OrderStatus.valueOf(newStatus.toUpperCase()));
+        order.setOrderStatus( newStatus );
         ordersRepository.save(order);
 
         return findOrderByCode(code);
+    }
+
+    @Scheduled(fixedRate = 300000) // Se ejecuta automáticamente cada 5 minutos (300,000 ms)
+    @Transactional
+    public void cancelExpiredOrdersAndRestoreStock() {
+        // Calculamos el tiempo límite: Órdenes creadas hace más de 15 minutos
+        LocalDateTime expirationTime = LocalDateTime.now().minusMinutes(15);
+
+        List<Orders> expiredOrders = ordersRepository.findExpiredOrders(OrderStatus.PENDING, expirationTime);
+
+        for (Orders order : expiredOrders) {
+            // Cambiar a cancelado para que Transbank o el frontend lo detecten si intentan retomarlo
+            order.setOrderStatus(OrderStatus.CANCELLED);
+
+            // Restituir el stock sumando la cantidad reservada
+            for (OrdersDetail detail : order.getOrdersDetails()) {
+                Product product = productRepository.findById(detail.getProductIdRef())
+                        .orElseThrow(() -> new ProductNotFoundException("Product not found during stock restore"));
+
+                product.setStock(product.getStock() + detail.getQuantity());
+                productRepository.save(product);
+            }
+
+            ordersRepository.save(order);
+            System.out.println("Orden expirada " + order.getCode() + " cancelada. Stock restituido.");
+        }
     }
 }
 

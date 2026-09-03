@@ -47,4 +47,12 @@ public class EmailService {
                 "\nEste código expira en 15 minutos. Si no solicitaste esto, ignora este mensaje.");
         mailSender.send(message);
     }
+
+    public void sendEmailUpdateWarning(String oldEmail) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(oldEmail);
+        message.setSubject("Alerta de seguridad - Cambio de correo solicitado");
+        message.setText("Se ha solicitado un cambio de correo electrónico para tu cuenta. Si no fuiste tú, contacta a soporte inmediatamente y cambia tu contraseña.");
+        mailSender.send(message);
+    }
 }

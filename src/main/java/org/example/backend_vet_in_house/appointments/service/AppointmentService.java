@@ -17,6 +17,8 @@ import org.example.backend_vet_in_house.shared.exception.pet.PetNotFoundExceptio
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -56,12 +58,32 @@ public class AppointmentService {
 
     @Transactional
     public List<AppointmentResDTO> findAllAppointment() {
+        // 1. Obtenemos TODAS las citas con 1 sola consulta
+        List<Appointment> appointments = appointmentRepository.findAll();
 
-        return appointmentRepository.findAll().stream()
+        if (appointments.isEmpty()) {
+            return List.of();
+        }
+
+        // 2. Extraemos todos los IDs de mascotas requeridos, eliminando duplicados
+        List<Long> petIds = appointments.stream()
+                .map(Appointment::getPetIdRef)
+                .distinct()
+                .toList();
+
+        // 3. Buscamos todas las mascotas en 1 sola consulta (Batch Fetching)
+        //    y las agrupamos en un mapa temporal en memoria para acceso ultrarrápido
+        Map<Long, Pet> petMap = petRepository.findAllById(petIds).stream()
+                .collect(Collectors.toMap(Pet::getPetId, pet -> pet));
+
+        // 4. Mapeamos la respuesta combinando la información en memoria
+        return appointments.stream()
                 .map(ap -> {
+                    Pet pet = petMap.get(ap.getPetIdRef());
 
-                    Pet pet = petRepository.findById(ap.getPetIdRef())
-                            .orElseThrow(() -> new PetNotFoundException("Pet " + ap.getPetIdRef() + "not found"));
+                    if (pet == null) {
+                        throw new PetNotFoundException("Pet " + ap.getPetIdRef() + " not found");
+                    }
 
                     return new AppointmentResDTO(
                             pet.getPatientNumber(),
@@ -76,9 +98,7 @@ public class AppointmentService {
                             ap.getServiceType().name(),
                             ap.getStatus().name()
                     );
-
                 }).toList();
-
     }
 
     // 1. Buscar cita por código

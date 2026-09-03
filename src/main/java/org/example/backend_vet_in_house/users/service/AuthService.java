@@ -174,6 +174,7 @@ public class AuthService {
 
         // Enviar el correo al NUEVO email
         emailService.sendEmailUpdateCode(newEmail, code);
+        emailService.sendEmailUpdateWarning(currentEmail);
 
         return "Código de verificación enviado al nuevo correo.";
     }

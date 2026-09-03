@@ -1,5 +1,6 @@
 package org.example.backend_vet_in_house.sales.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.backend_vet_in_house.catalog.model.Product;
 import org.example.backend_vet_in_house.catalog.repository.ProductRepository;
@@ -21,12 +22,13 @@ public class OrderDetailService {
     private final OrdersDetailRepository ordersDetailRepository;
     private final ProductRepository productRepository;
 
+    @Transactional
     public void createOrderDetail(List<OrderDetailReqDTO> listOrdersDetails, Orders order) {
 
         List<OrdersDetail> res = listOrdersDetails.stream()
                 .map(p -> {
 
-                    Product prod = productRepository.findProductByCode(p.codeProduct())
+                    Product prod = productRepository.findProductByCodeForUpdate(p.codeProduct())
                             .orElseThrow(() -> new ProductNotFoundException("Product " + p.codeProduct() + "not found"));
 
                     if(p.quantity() > prod.getStock()) {
