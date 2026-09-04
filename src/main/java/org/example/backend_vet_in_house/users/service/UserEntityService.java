@@ -53,6 +53,7 @@ public class UserEntityService {
 
             return new ContentOrderResDTO(
                     order.getCode(),
+                    order.getOrderStatus().name(),
                     order.getSubtotal(),
                     order.getShippingCost(),
                     order.getTax(),

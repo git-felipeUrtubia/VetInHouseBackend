@@ -9,6 +9,7 @@ import org.example.backend_vet_in_house.appointments.model.AppointmentResult;
 import org.example.backend_vet_in_house.appointments.repository.AppointmentRepository;
 import org.example.backend_vet_in_house.appointments.repository.AppointmentResultRepository;
 import org.example.backend_vet_in_house.shared.exception.appointment.AppointmentNotFoundException;
+import org.example.backend_vet_in_house.shared.exception.appointment.AppointmentResultNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,23 +32,26 @@ public class AppointmentResultService {
             throw new RuntimeException("Result for appointment " + codeService + " already exists");
         }
 
+        LocalDateTime dateTime = LocalDateTime.now();
+
         AppointmentResult result = AppointmentResult.builder()
                 .appointment(appointment)
                 .diagnosis(req.diagnosis())
                 .treatment(req.treatment())
-                .createdAt(LocalDateTime.now())
+                .createdAt(dateTime)
                 .build();
 
         appointmentResultRepository.save(result);
         return "Appointment result created successfully!";
     }
 
+    @Transactional
     public AppointmentResultResDTO getResultByAppointmentCode(String codeService) {
         Appointment appointment = appointmentRepository.findAppointmentByCode(codeService)
                 .orElseThrow(() -> new AppointmentNotFoundException("Appointment " + codeService + " not found"));
 
         AppointmentResult result = appointmentResultRepository.findByAppointment_AppointmentId(appointment.getAppointmentId())
-                .orElseThrow(() -> new RuntimeException("Result not found for appointment " + codeService));
+                .orElseThrow(() -> new AppointmentResultNotFoundException("Result not found for appointment " + codeService));
 
         return new AppointmentResultResDTO(
                 appointment.getCodeService(),

@@ -1,5 +1,6 @@
 package org.example.backend_vet_in_house.appointments.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -24,10 +25,7 @@ public class AppointmentResult {
     @Column(name = "treatment", columnDefinition = "TEXT")
     private String treatment;
 
-    // Opcional: Si decides guardar el PDF en un servicio como AWS S3 o Cloudinary
-    @Column(name = "pdf_url")
-    private String pdfUrl;
-
+    @JsonFormat(pattern = "dd-MM-yyyy HH:mm")
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

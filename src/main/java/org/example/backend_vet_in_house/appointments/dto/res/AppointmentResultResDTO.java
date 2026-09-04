@@ -8,7 +8,7 @@ public record AppointmentResultResDTO(
         String codeService,
         String diagnosis,
         String treatment,
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+        @JsonFormat(pattern = "dd-MM-yyyy HH:mm")
         LocalDateTime createdAt
 ) {
 }
