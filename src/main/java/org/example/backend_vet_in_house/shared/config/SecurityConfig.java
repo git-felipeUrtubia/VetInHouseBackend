@@ -75,6 +75,10 @@ public class SecurityConfig {
 
                     http.requestMatchers("/api/v1/appointment-result/**").permitAll();
 
+                    http.requestMatchers(HttpMethod.POST, "/api/v1/schedule/create").hasRole("ADMIN");
+                    http.requestMatchers(HttpMethod.DELETE, "/api/v1/schedule/delete").hasRole("ADMIN");
+                    http.requestMatchers(HttpMethod.GET, "/api/v1/schedule/available").permitAll();
+
                     http.requestMatchers("/api/v1/address/**").permitAll();
                     http.requestMatchers("/api/v1/commune/**").permitAll();
                     http.requestMatchers("/api/v1/region/**").permitAll();

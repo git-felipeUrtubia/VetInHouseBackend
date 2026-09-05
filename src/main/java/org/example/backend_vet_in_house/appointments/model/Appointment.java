@@ -29,7 +29,7 @@ public class Appointment {
     @Column(name = "reason_for_visit")
     private String reasonForVisit;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "dd-MM-yyyy HH:mm")
     @Column(name = "appointment_date")
     private LocalDateTime appointmentDate;
 
@@ -50,4 +50,8 @@ public class Appointment {
 
     @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private AppointmentResult appointmentResult;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "slot_id_ref", referencedColumnName = "slotId")
+    private AvailableSlot availableSlot;
 }
