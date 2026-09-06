@@ -10,12 +10,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -32,8 +31,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
         return httpSecurity
-                .csrf(csrf -> csrf.disable())
-                .httpBasic(Customizer.withDefaults())
+                .csrf(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(http -> {
 
                     http.requestMatchers(HttpMethod.POST, "/api/v1/payments/create").permitAll();
@@ -41,6 +40,7 @@ public class SecurityConfig {
 
                     http.requestMatchers(HttpMethod.POST, "/api/v1/auth/register").permitAll();
                     http.requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll();
+                    http.requestMatchers(HttpMethod.POST, "/api/v1/auth/logout").permitAll();
                     http.requestMatchers(HttpMethod.POST, "/api/v1/auth/forgot-password").permitAll();
                     http.requestMatchers(HttpMethod.POST, "/api/v1/auth/verify-code").permitAll();
                     http.requestMatchers(HttpMethod.POST, "/api/v1/auth/reset-password").permitAll();
@@ -93,7 +93,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager() throws Exception {
+    public AuthenticationManager authenticationManager() {
         return authenticationConfiguration.getAuthenticationManager();
     }
 

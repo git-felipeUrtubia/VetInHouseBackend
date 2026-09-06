@@ -31,12 +31,20 @@ public class JwtFilterValidator extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        String token = request.getHeader(HttpHeaders.AUTHORIZATION);
+        String token = null;
 
-        // Es buena práctica validar que empiece con "Bearer " para evitar StringIndexOutOfBoundsException
-        if(token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7);
+        // 1. Extraer el token de las cookies
+        if (request.getCookies() != null) {
+            for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+                if ("jwt".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
+        }
 
+        // 2. A ADIR validaci n para ignorar tokens vac os (!token.trim().isEmpty())
+        if(token != null && !token.trim().isEmpty()) {
             try {
                 DecodedJWT decodedJWT = jwtUtil.validateToken(token);
                 String username = jwtUtil.extractUsername(decodedJWT);
@@ -47,16 +55,25 @@ public class JwtFilterValidator extends OncePerRequestFilter {
                 Authentication authentication = new UsernamePasswordAuthenticationToken(username, null, authorities);
                 context.setAuthentication(authentication);
                 SecurityContextHolder.setContext(context);
-
             } catch (JWTVerificationException e) {
-                // Construir la respuesta 401 Unauthorized directamente desde el filtro
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json");
-                response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"Token inválido o expirado\"}");
-                return; // Detenemos la ejecución, no llamamos a filterChain.doFilter()
+                response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"Token inv lido o expirado\"}");
+                return;
             }
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        // Excluye las rutas p blicas para que un token caducado no bloquee el login
+        return path.equals("/api/v1/auth/login") ||
+                path.equals("/api/v1/auth/register") ||
+                path.equals("/api/v1/auth/forgot-password") ||
+                path.equals("/api/v1/auth/verify-code") ||
+                path.equals("/api/v1/auth/reset-password");
     }
 }
