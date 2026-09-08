@@ -64,7 +64,9 @@ public class SecurityConfig {
                     http.requestMatchers("/api/v1/user/find/order-history").authenticated();
                     http.requestMatchers("/api/v1/user/find/pet-appointment").authenticated();
                     http.requestMatchers("/api/v1/user/find/pet-user").authenticated();
-
+                    http.requestMatchers("/api/v1/user/find/phones").authenticated();
+                    http.requestMatchers("/api/v1/user/save/phone").authenticated();
+                    http.requestMatchers("/api/v1/user/delete/phone").authenticated();
 
 
                     http.requestMatchers("/api/v1/pet/create").authenticated();

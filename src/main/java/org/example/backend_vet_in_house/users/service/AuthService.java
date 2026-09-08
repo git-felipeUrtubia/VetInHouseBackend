@@ -77,6 +77,8 @@ public class AuthService {
 
         String token = jwtUtil.createToken(authentication);
 
+        System.out.println("TOKEN: " + token);
+
         UserEntity user = userEntityRepository.findUserByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Username" + username + " not found"));
 
