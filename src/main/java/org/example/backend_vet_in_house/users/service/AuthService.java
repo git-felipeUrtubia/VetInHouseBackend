@@ -1,6 +1,7 @@
 package org.example.backend_vet_in_house.users.service;
 
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.backend_vet_in_house.shared.exception.user.UserAlreadyExistsException;
 import org.example.backend_vet_in_house.shared.exception.user.UserNotFoundException;
@@ -38,6 +39,7 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final EmailService emailService;
 
+    @Transactional
     public String registerUser(RegisterReqDTO req) throws RoleNotFoundException {
 
         if(userEntityRepository.existsByUsername(req.username())) {
@@ -67,6 +69,7 @@ public class AuthService {
         return "User registered with successfully";
     }
 
+    @Transactional
     public LoginResDTO loginUser(LoginReqDTO req) {
         String username = req.username();
         String password = req.password();
@@ -97,8 +100,13 @@ public class AuthService {
                 true);
     }
 
+    @Transactional
     public Authentication authenticated(String username, String password) {
         UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(username);
+
+        if (!userDetails.isEnabled()) {
+            throw new BadCredentialsException("Esta cuenta ha sido desactivada.");
+        }
 
         if(!passwordEncoder.matches(password, userDetails.getPassword())) {
             throw new BadCredentialsException("Invalid password.");
@@ -107,6 +115,7 @@ public class AuthService {
         return new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
     }
 
+    @Transactional
     public String forgotPassword(String username) {
         UserEntity user = userEntityRepository.findUserByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
@@ -122,6 +131,7 @@ public class AuthService {
         return "Código enviado exitosamente al correo.";
     }
 
+    @Transactional
     public boolean verifyCode(String username, String code) {
         UserEntity user = userEntityRepository.findUserByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
@@ -137,6 +147,7 @@ public class AuthService {
         return true;
     }
 
+    @Transactional
     public String resetPassword(String username, String code, String newPassword) {
         verifyCode(username, code); // Reutilizamos la validación por seguridad
 
@@ -154,7 +165,8 @@ public class AuthService {
         return "Contraseña actualizada con éxito.";
     }
 
-    // 1. SOLICITAR EL CAMBIO DE CORREO
+
+    @Transactional
     public String requestEmailUpdate(String currentEmail, String newEmail) {
         // Verificar que el nuevo correo no esté ya registrado por otra persona
         if (userEntityRepository.existsByUsername(newEmail)) {
@@ -181,7 +193,8 @@ public class AuthService {
         return "Código de verificación enviado al nuevo correo.";
     }
 
-    // 2. VERIFICAR CÓDIGO Y APLICAR EL CAMBIO
+
+    @Transactional
     public String verifyAndApplyEmailUpdate(String currentEmail, String code) {
         UserEntity user = userEntityRepository.findUserByUsername(currentEmail)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -204,6 +217,42 @@ public class AuthService {
         userEntityRepository.save(user);
 
         return "Correo actualizado con éxito.";
+    }
+
+    @Transactional
+    public String changePassword(String username, String currentPassword, String newPassword) {
+        // 1. Buscar al usuario por su username (email)
+        UserEntity user = userEntityRepository.findUserByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+
+        // 2. Verificar que la contraseña actual coincida
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new BadCredentialsException("La contraseña actual es incorrecta.");
+        }
+
+        // --- NUEVA VALIDACIÓN: Evitar que la nueva sea igual a la actual ---
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new IllegalArgumentException("La nueva contraseña no puede ser igual a la actual.");
+        }
+
+        // 3. Codificar y actualizar con la nueva contraseña
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userEntityRepository.save(user);
+
+        return "Contraseña actualizada exitosamente.";
+    }
+
+    @Transactional
+    public String softDeleteAccount(String username) {
+        // 1. Buscar al usuario por su username (email)
+        UserEntity user = userEntityRepository.findUserByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+
+        // 2. Borrado suave: deshabilitar la cuenta
+        user.setEnabled(false);
+        userEntityRepository.save(user);
+
+        return "Cuenta desactivada y eliminada lógicamente con éxito.";
     }
 
 }

@@ -125,4 +125,33 @@ public class AuthController {
         }
     }
 
+    @PutMapping("/change-password")
+    public ResponseEntity<?> changePassword(
+            @Valid @RequestBody ChangePasswordReqDTO req,
+            Authentication authentication) {
+
+        String username = authentication.getName();
+        String response = authService.changePassword(username, req.currentPassword(), req.newPassword());
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/delete-account")
+    public ResponseEntity<?> softDeleteAccount(Authentication authentication) {
+        String username = authentication.getName();
+        String response = authService.softDeleteAccount(username);
+
+        // Opcional: limpiar la cookie JWT al mismo tiempo para cerrar la sesión de inmediato
+        ResponseCookie cleanCookie = ResponseCookie.from("jwt", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Lax")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cleanCookie.toString())
+                .body(response);
+    }
+
 }

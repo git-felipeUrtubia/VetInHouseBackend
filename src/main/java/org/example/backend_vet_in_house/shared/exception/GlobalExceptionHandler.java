@@ -39,14 +39,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({BadCredentialsException.class, UsernameNotFoundException.class})
-    public ResponseEntity<Map<String, String>> handleAuthenticationExceptions(RuntimeException ex) {
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<Map<String, String>> handleBadCredentials(BadCredentialsException ex) {
         Map<String, String> response = new HashMap<>();
-
         response.put("error", "Unauthorized");
-        // Puedes poner un mensaje genérico por seguridad (para no revelar si falló el correo o la clave)
-        response.put("message", "Correo o contraseña incorrectos");
-
+        response.put("message", ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
@@ -216,6 +213,14 @@ public class GlobalExceptionHandler {
         response.put("error", "Bad Request");
         response.put("message", ex.getMessage()); // Devolver  "L mite m ximo de 3 n meros alcanzado."
 
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "Bad Request");
+        response.put("message", ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
