@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.backend_vet_in_house.appointments.dto.req.CreateAppointmentReqDTO;
 import org.example.backend_vet_in_house.appointments.dto.req.UpdateAppointmentReqDTO;
 import org.example.backend_vet_in_house.appointments.dto.res.AppointmentResDTO;
+import org.example.backend_vet_in_house.appointments.dto.res.AppointmentWithUserResDTO;
 import org.example.backend_vet_in_house.appointments.model.Appointment;
 import org.example.backend_vet_in_house.appointments.model.AvailableSlot;
 import org.example.backend_vet_in_house.appointments.model.ServiceType;
@@ -16,6 +17,10 @@ import org.example.backend_vet_in_house.pets.repository.PetRepository;
 import org.example.backend_vet_in_house.shared.exception.appointment.AppointmentAlreadyExistException;
 import org.example.backend_vet_in_house.shared.exception.appointment.AppointmentNotFoundException;
 import org.example.backend_vet_in_house.shared.exception.pet.PetNotFoundException;
+import org.example.backend_vet_in_house.shared.exception.user.UserNotFoundException;
+import org.example.backend_vet_in_house.users.model.UserEntity;
+import org.example.backend_vet_in_house.users.model.UserPhoneEntity;
+import org.example.backend_vet_in_house.users.repository.UserEntityRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -30,6 +35,7 @@ public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final PetRepository petRepository;
     private final AvailableSlotRepository availableSlotRepository;
+    private final UserEntityRepository userEntityRepository;
 
     @Transactional
     public String createAppointment(CreateAppointmentReqDTO req) {
@@ -61,7 +67,7 @@ public class AppointmentService {
     }
 
     @Transactional
-    public List<AppointmentResDTO> findAllAppointment() {
+    public List<AppointmentWithUserResDTO> findAllAppointment() {
         List<Appointment> appointments = appointmentRepository.findAll();
         if (appointments.isEmpty()) return List.of();
 
@@ -76,13 +82,19 @@ public class AppointmentService {
         return appointments.stream()
                 .map(ap -> {
                     Pet pet = petMap.get(ap.getPetIdRef());
-                    if (pet == null) {
-                        throw new PetNotFoundException("Pet " + ap.getPetIdRef() + " not found");
-                    }
-                    return buildResDTO(ap, pet);
+
+                    UserEntity user = userEntityRepository.findById(pet.getUserIdRef())
+                            .orElseThrow(() -> new UserNotFoundException("User " + pet.getUserIdRef() + " not found"));
+
+                    List<String> phones = user.getPhones().stream()
+                            .map(UserPhoneEntity::getPhoneNumber)
+                            .toList();
+
+                    return buildResDTOV2(ap, pet, user, phones);
                 }).toList();
     }
 
+    @Transactional
     public AppointmentResDTO findAppointmentByCode(String codeService) {
         Appointment ap = appointmentRepository.findAppointmentByCode(codeService)
                 .orElseThrow(() -> new AppointmentNotFoundException("Appointment " + codeService + " not found"));
@@ -179,6 +191,26 @@ public class AppointmentService {
 
     private AppointmentResDTO buildResDTO(Appointment ap, Pet pet) {
         return new AppointmentResDTO(
+                pet.getPatientNumber(),
+                pet.getName(),
+                pet.getWeight(),
+                pet.getAge(),
+                ap.getCodeService(),
+                ap.getReasonForVisit(),
+                ap.getAppointmentDate(),
+                ap.getCreateAt(),
+                ap.getUpdateAt(),
+                ap.getServiceType().name(),
+                ap.getStatus().name()
+        );
+    }
+
+    private AppointmentWithUserResDTO buildResDTOV2(Appointment ap, Pet pet, UserEntity user, List<String> phones) {
+        return new AppointmentWithUserResDTO(
+                user.getFirstName(),
+                user.getLastName(),
+                user.getUsername(),
+                phones,
                 pet.getPatientNumber(),
                 pet.getName(),
                 pet.getWeight(),
