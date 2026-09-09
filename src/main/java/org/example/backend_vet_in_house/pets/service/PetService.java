@@ -1,6 +1,10 @@
 package org.example.backend_vet_in_house.pets.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.example.backend_vet_in_house.appointments.model.Appointment;
+import org.example.backend_vet_in_house.appointments.repository.AppointmentRepository;
+import org.example.backend_vet_in_house.appointments.repository.AvailableSlotRepository;
 import org.example.backend_vet_in_house.pets.dto.req.SavePetReqDTO;
 import org.example.backend_vet_in_house.pets.dto.req.UpdatePetReqDTO;
 import org.example.backend_vet_in_house.pets.dto.res.PetResDTO;
@@ -23,6 +27,8 @@ public class PetService {
 
     private final PetRepository petRepository;
     private final UserEntityRepository userEntityRepository;
+    private final AppointmentRepository appointmentRepository;
+    private final AvailableSlotRepository availableSlotRepository;
 
     public String savePet(SavePetReqDTO req) {
 
@@ -93,13 +99,33 @@ public class PetService {
         return "Pet update with successfully!";
     }
 
+    @Transactional
     public String deletePetByPacientNumber(String patientNumber) {
-
         Pet pet = petRepository.findPetByPatientNumber(patientNumber)
                 .orElseThrow(() -> new PetNotFoundException("Pet " + patientNumber + " not found"));
 
+        // 1. Buscar todas las citas asociadas a esta mascota
+        List<Appointment> appointments = appointmentRepository.findAllByPet(pet.getPetId());
+
+        // 2. Iterar sobre las citas para liberar los horarios y eliminarlas
+        for (Appointment ap : appointments) {
+
+            // Liberar el horario reservado
+            availableSlotRepository.findBySlotDateAndStartTime(
+                    ap.getAppointmentDate().toLocalDate(),
+                    ap.getAppointmentDate().toLocalTime()
+            ).ifPresent(slot -> {
+                slot.setAvailable(true);
+                availableSlotRepository.save(slot);
+            });
+
+            // Eliminar la cita (JPA eliminará automáticamente el AppointmentResult asociado por el CascadeType.ALL)
+            appointmentRepository.delete(ap);
+        }
+
+        // 3. Finalmente eliminar la mascota de forma segura
         petRepository.deleteById(pet.getPetId());
 
-        return "Pet delete with successfully";
+        return "Pet deleted successfully with all its associated appointments";
     }
 }
