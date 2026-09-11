@@ -6,6 +6,7 @@ import org.example.backend_vet_in_house.users.dto.req.*;
 import org.example.backend_vet_in_house.users.dto.res.LoginResDTO;
 import org.example.backend_vet_in_house.users.service.AuthService;
 import org.example.backend_vet_in_house.users.service.EmailService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -23,6 +24,9 @@ public class AuthController {
     private final AuthService authService;
     private final EmailService emailService;
 
+    @Value("${cookie.secure:false}")
+    private boolean isCookieSecure;
+
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterReqDTO req) throws RoleNotFoundException {
 
@@ -36,10 +40,10 @@ public class AuthController {
         // 1. Crear la cookie de forma segura
         ResponseCookie jwtCookie = ResponseCookie.from("jwt", loginData.jwt())
                 .httpOnly(true)       // Evita que JavaScript (XSS) pueda leerla
-                .secure(false)        // Ponlo en 'true' cuando subas a producci n con HTTPS
+                .secure(isCookieSecure)
                 .path("/")            // Disponible para todas las rutas
                 .maxAge(86400)        // 1 d a, igual que la expiraci n de tu token
-                .sameSite("Lax")      // Ayuda a prevenir CSRF. "Lax" funciona bien para localhost
+                .sameSite(isCookieSecure ? "Strict" : "Lax")      // Ayuda a prevenir CSRF. "Lax" funciona bien para localhost
                 .build();
 
         // 2. Adjuntar la cookie a la respuesta
@@ -52,10 +56,10 @@ public class AuthController {
     public ResponseEntity<?> logoutUser() {
         ResponseCookie cleanCookie = ResponseCookie.from("jwt", "")
                 .httpOnly(true)
-                .secure(false)
+                .secure(isCookieSecure) // Aplicado dinámicamente
                 .path("/")
-                .maxAge(0) // maxAge 0 destruye la cookie inmediatamente
-                .sameSite("Lax")
+                .maxAge(0)
+                .sameSite(isCookieSecure ? "Strict" : "Lax")
                 .build();
 
         return ResponseEntity.ok()
@@ -140,13 +144,12 @@ public class AuthController {
         String username = authentication.getName();
         String response = authService.softDeleteAccount(username);
 
-        // Opcional: limpiar la cookie JWT al mismo tiempo para cerrar la sesión de inmediato
         ResponseCookie cleanCookie = ResponseCookie.from("jwt", "")
                 .httpOnly(true)
-                .secure(false)
+                .secure(isCookieSecure) // Aplicado dinámicamente
                 .path("/")
                 .maxAge(0)
-                .sameSite("Lax")
+                .sameSite(isCookieSecure ? "Strict" : "Lax")
                 .build();
 
         return ResponseEntity.ok()

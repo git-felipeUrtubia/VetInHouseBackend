@@ -1,5 +1,6 @@
 package org.example.backend_vet_in_house.shared.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -12,24 +13,22 @@ import java.util.List;
 @Configuration
 public class CorsConfig {
 
+    // Inyectamos el origen permitido dinámicamente
+    @Value("${cors.allowed-origin:http://localhost:5173}")
+    private String allowedOrigin;
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-
+        // Aplicamos el origen inyectado
+        configuration.setAllowedOrigins(List.of(allowedOrigin));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-
-        // 3. Cabeceras permitidas (El "*" es vital para recibir el token JWT en el header 'Authorization')
         configuration.setAllowedHeaders(List.of("*"));
-
-        // 4. Permitir credenciales (Cookies, tokens de autenticación)
         configuration.setAllowCredentials(true);
 
-        // 5. Aplicar esta configuración a todas las rutas de la API (/**)
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-
         return source;
     }
 }

@@ -81,7 +81,6 @@ public class OrdersService {
 
                 }).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        System.out.println("SUBTOTAL: " + subtotal);
         BigDecimal shippingCost = region.getShippingCost();
         BigDecimal totalAmount = subtotal.add(shippingCost);
 
@@ -264,7 +263,6 @@ public class OrdersService {
             }
 
             ordersRepository.save(order);
-            System.out.println("Orden expirada " + order.getCode() + " cancelada. Stock restituido.");
         }
     }
 }

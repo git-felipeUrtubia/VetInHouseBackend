@@ -3,6 +3,7 @@ package org.example.backend_vet_in_house.users.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.backend_vet_in_house.shared.exception.user.UserAlreadyExistsException;
 import org.example.backend_vet_in_house.shared.exception.user.UserNotFoundException;
 import org.example.backend_vet_in_house.users.dto.res.RoleResDTO;
@@ -30,6 +31,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j // <- Nueva anotación para habilitar logs profesionales
 public class AuthService {
 
     private final UserDetailsServiceImpl userDetailsServiceImpl;
@@ -79,8 +81,6 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String token = jwtUtil.createToken(authentication);
-
-        System.out.println("TOKEN: " + token);
 
         UserEntity user = userEntityRepository.findUserByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Username" + username + " not found"));

@@ -19,6 +19,10 @@ public class PaymentService {
     @Value("${transbank.commerce.code}")
     private String commerceCode;
 
+    // Inyectamos el tipo de integración dinámicamente
+    @Value("${transbank.integration.type:TEST}")
+    private String integrationType;
+
     public WebpayPlusTransactionCreateResponse iniciarPago(
             String buyOrder,
             String sessionId,
@@ -26,8 +30,11 @@ public class PaymentService {
             String returnUrl
     )  throws Exception {
 
+        // Parseamos el string al tipo de integración de Transbank
+        IntegrationType type = IntegrationType.valueOf(integrationType.toUpperCase());
+
         WebpayPlus.Transaction tx = new WebpayPlus.Transaction(
-                new WebpayOptions(commerceCode, apiKey, IntegrationType.TEST)
+                new WebpayOptions(commerceCode, apiKey, type)
         );
 
         return tx.create(
@@ -39,8 +46,11 @@ public class PaymentService {
     }
 
     public WebpayPlusTransactionCommitResponse confirmarPago(String token) throws Exception {
+
+        IntegrationType type = IntegrationType.valueOf(integrationType.toUpperCase());
+
         WebpayPlus.Transaction tx = new WebpayPlus.Transaction(
-                new WebpayOptions(commerceCode, apiKey, IntegrationType.TEST)
+                new WebpayOptions(commerceCode, apiKey, type)
         );
 
         // Transbank verifica el token y nos devuelve el estado real del pago
