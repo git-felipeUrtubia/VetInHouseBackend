@@ -14,7 +14,7 @@ import java.util.List;
 public class CorsConfig {
 
     // Inyectamos el origen permitido dinámicamente
-    @Value("${cors.allowed-origin:http://localhost:5173}")
+    @Value("${cors.allowed-origin}")
     private String allowedOrigin;
 
     @Bean
