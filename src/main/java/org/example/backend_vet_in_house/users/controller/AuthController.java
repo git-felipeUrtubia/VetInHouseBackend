@@ -43,7 +43,7 @@ public class AuthController {
                 .secure(isCookieSecure)
                 .path("/")            // Disponible para todas las rutas
                 .maxAge(86400)        // 1 d a, igual que la expiraci n de tu token
-                .sameSite(isCookieSecure ? "Strict" : "Lax")      // Ayuda a prevenir CSRF. "Lax" funciona bien para localhost
+                .sameSite(isCookieSecure ? "None" : "Lax")      // Ayuda a prevenir CSRF. "Lax" funciona bien para localhost
                 .build();
 
         // 2. Adjuntar la cookie a la respuesta
@@ -59,7 +59,7 @@ public class AuthController {
                 .secure(isCookieSecure) // Aplicado dinámicamente
                 .path("/")
                 .maxAge(0)
-                .sameSite(isCookieSecure ? "Strict" : "Lax")
+                .sameSite(isCookieSecure ? "None" : "Lax")
                 .build();
 
         return ResponseEntity.ok()
@@ -149,7 +149,7 @@ public class AuthController {
                 .secure(isCookieSecure) // Aplicado dinámicamente
                 .path("/")
                 .maxAge(0)
-                .sameSite(isCookieSecure ? "Strict" : "Lax")
+                .sameSite(isCookieSecure ? "None" : "Lax")
                 .build();
 
         return ResponseEntity.ok()
