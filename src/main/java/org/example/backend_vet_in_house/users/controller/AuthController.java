@@ -42,7 +42,7 @@ public class AuthController {
                 .httpOnly(true)       // Evita que JavaScript (XSS) pueda leerla
                 .secure(isCookieSecure)
                 .path("/")            // Disponible para todas las rutas
-                .domain("lucci.cl")
+                .domain("vet-in-house-chile.vercel.app")
                 .maxAge(86400)        // 1 d a, igual que la expiraci n de tu token
                 .sameSite(isCookieSecure ? "None" : "Lax")      // Ayuda a prevenir CSRF. "Lax" funciona bien para localhost
                 .build();
@@ -59,7 +59,7 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(isCookieSecure) // Aplicado dinámicamente
                 .path("/")
-                .domain("lucci.cl")
+                .domain("vet-in-house-chile.vercel.app")
                 .maxAge(0)
                 .sameSite(isCookieSecure ? "None" : "Lax")
                 .build();
@@ -150,7 +150,7 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(isCookieSecure) // Aplicado dinámicamente
                 .path("/")
-                .domain("lucci.cl")
+                .domain("vet-in-house-chile.vercel.app")
                 .maxAge(0)
                 .sameSite(isCookieSecure ? "None" : "Lax")
                 .build();
