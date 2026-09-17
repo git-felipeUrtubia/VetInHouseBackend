@@ -88,6 +88,13 @@
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.resend</groupId>
+			<artifactId>resend-java</artifactId>
+			<version>LATEST</version>
+		</dependency>
+
+
 	</dependencies>
 
 	<build>
