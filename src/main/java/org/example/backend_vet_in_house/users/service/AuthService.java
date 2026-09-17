@@ -105,7 +105,7 @@ public class AuthService {
         UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(username);
 
         if (!userDetails.isEnabled()) {
-            throw new BadCredentialsException("Esta cuenta ha sido desactivada.");
+            throw new BadCredentialsException("Esta cuenta ha sido desactivada. Contactese con servicio al cliente");
         }
 
         if(!passwordEncoder.matches(password, userDetails.getPassword())) {
